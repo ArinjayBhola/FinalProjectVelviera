@@ -73,7 +73,7 @@ function Registration() {
         className="w-[100%] h-[80px] flex items-center justify-start px-[30px] gap-[10px] cursor-pointer"
         onClick={() => navigate("/")}>
         <img
-          className="w-[40px]"
+          className="w-[40px] mix-blend-screen"
           src={Logo}
           alt=""
         />
