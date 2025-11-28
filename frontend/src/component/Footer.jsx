@@ -37,9 +37,9 @@ function Footer() {
           </div>
           <ul>
             <li className="text-[15px] text-[#1e2223] ">+91-9876543210</li>
-            <li className="text-[15px] text-[#1e2223] ">contact@Velviera.com</li>
+            <li className="text-[15px] text-[#1e2223] ">contact@velviera.com</li>
             <li className="text-[15px] text-[#1e2223] hidden md:block">+1-123-456-7890</li>
-            <li className="text-[15px] text-[#1e2223] hidden md:block">admin@Velviera.com</li>
+            <li className="text-[15px] text-[#1e2223] hidden md:block">admin@velviera.com</li>
           </ul>
         </div>
       </div>

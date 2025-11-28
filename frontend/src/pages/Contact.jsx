@@ -26,7 +26,7 @@ function Contact() {
           </p>
           <p className="lg:w-[80%] w-[100%] text-[white] md:text-[16px] text-[13px]">
             <p>tel: +91-9876543210</p>
-            <p>Email: admin@Velviera.com</p>
+            <p>Email: admin@velviera.com</p>
           </p>
           <p className="lg:w-[80%] w-[100%] text-[15px] text-[white] lg:text-[18px] mt-[10px] font-bold">
             Careers at Velviera
