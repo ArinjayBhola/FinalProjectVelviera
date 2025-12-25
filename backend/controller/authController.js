@@ -6,7 +6,6 @@ import { genToken, genToken1 } from "../config/token.js";
 export const registration = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    console.log(req.body);
     const existUser = await User.findOne({ email });
     if (existUser) {
       return res.status(400).json({ message: "User already exist" });
