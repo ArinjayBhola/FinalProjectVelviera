@@ -1,195 +1,171 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { shopDataContext } from "../context/ShopContext";
-import { FaStar } from "react-icons/fa";
-import { FaStarHalfAlt } from "react-icons/fa";
-import RelatedProduct from "../component/RelatedProduct";
-import Loading from "../component/Loading";
+import { HiStar, HiOutlineCheckCircle } from "react-icons/hi2";
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
 import { toast } from 'react-toastify';
 
-function ProductDetail() {
-  let { productId } = useParams();
-  let { products, currency, addtoCart, loading } = useContext(shopDataContext);
-  let [productData, setProductData] = useState(false);
+const ProductDetail = () => {
+  const { productId } = useParams();
+  const { products, currency, addtoCart, loading } = useContext(shopDataContext);
+  const [productData, setProductData] = useState(null);
+  const [mainImage, setMainImage] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
 
-  const [image, setImage] = useState("");
-  const [image1, setImage1] = useState("");
-  const [image2, setImage2] = useState("");
-  const [image3, setImage3] = useState("");
-  const [image4, setImage4] = useState("");
-  const [size, setSize] = useState("");
-
-  const fetchProductData = async () => {
-    products.map((item) => {
-      if (item._id === productId) {
-        setProductData(item);
-        console.log(productData);
-        setImage1(item.image1);
-        setImage2(item.image2);
-        setImage3(item.image3);
-        setImage4(item.image4);
-        setImage(item.image1);
-
-        return null;
+  const fetchProductData = () => {
+    const product = products.find(item => item._id === productId);
+    if (product) {
+      const images = [product.image1, product.image2, product.image3, product.image4].filter(Boolean);
+      
+      let parsedSizes = [];
+      try {
+        if (typeof product.sizes === 'string') {
+          parsedSizes = JSON.parse(product.sizes);
+        } else if (Array.isArray(product.sizes)) {
+          // Sometimes it comes as an array containing a single JSON string
+          if (product.sizes.length === 1 && typeof product.sizes[0] === 'string' && product.sizes[0].startsWith('[')) {
+            parsedSizes = JSON.parse(product.sizes[0]);
+          } else {
+            parsedSizes = product.sizes;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse sizes", e);
+        parsedSizes = Array.isArray(product.sizes) ? product.sizes : [];
       }
-    });
+
+      setProductData({ ...product, images, sizes: parsedSizes });
+      setMainImage(images[0] || "");
+    }
   };
 
   useEffect(() => {
     fetchProductData();
   }, [productId, products]);
 
-  // Helper to safely parse sizes
-  const getProcessedSizes = () => {
-    if (!productData || !productData.sizes) return [];
-    
-    let sizes = productData.sizes;
-    
-    // Handle case where sizes might be a stringified array inside an array
-    if (Array.isArray(sizes) && sizes.length === 1 && typeof sizes[0] === 'string') {
-      try {
-        // Try to parse if it looks like a JSON array
-        if (sizes[0].startsWith('[')) {
-           const parsed = JSON.parse(sizes[0]);
-           if (Array.isArray(parsed)) return parsed;
-        }
-      } catch (e) {
-        console.error("Error parsing sizes:", e);
-      }
-    }
-    
-    return sizes;
-  };
-
-  const processedSizes = getProcessedSizes();
-
   const handleAddToCart = () => {
     const isClothing = ['clothing', 'men', 'women', 'kids'].includes(productData.category.toLowerCase());
     
     if (isClothing) {
-      if (!size) {
-        toast.error("Please Select Size");
+      if (!selectedSize) {
+        toast.error("Please select a size");
         return;
       }
-      addtoCart(productData._id, size);
+      addtoCart(productData._id, selectedSize);
     } else {
       addtoCart(productData._id, "Standard");
     }
   };
 
-  return productData ? (
-    <div className="w-full min-h-screen bg-gradient-to-l from-[#141414] to-[#0c2025] flex flex-col items-center pt-20 pb-10">
-      <div className="max-w-7xl w-full flex flex-col lg:flex-row gap-10 px-4 md:px-10">
-        {/* Image Gallery Section */}
-        <div className="flex flex-col-reverse lg:flex-row gap-4 lg:w-1/2">
-          <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto justify-between lg:justify-start">
-            {[image1, image2, image3, image4].map((img, index) => (
-              img && (
-                <div key={index} className="w-20 h-20 md:w-24 md:h-24 bg-slate-300 border border-gray-600 rounded-md overflow-hidden cursor-pointer flex-shrink-0" onClick={() => setImage(img)}>
-                  <img
-                    src={img}
-                    alt={`product-thumb-${index}`}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
-                  />
-                </div>
-              )
+  if (!productData) return <div className="min-h-screen bg-[var(--background-base)]" />;
+
+  const isClothing = ['clothing', 'men', 'women', 'kids'].includes(productData.category.toLowerCase());
+
+  return (
+    <div className="container mx-auto px-4 py-12 md:py-24">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        {/* Left: Image Gallery */}
+        <div className="flex flex-col-reverse md:flex-row gap-4">
+          <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto">
+            {productData.images.map((img, index) => (
+              <button 
+                key={index} 
+                onClick={() => setMainImage(img)}
+                className={`w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-soft border transition-all ${
+                  mainImage === img ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/10' : 'border-[var(--border-base)] hover:border-[var(--brand-secondary)]'
+                } overflow-hidden bg-[var(--background-subtle)]`}
+              >
+                <img src={img} alt="" className="w-full h-full object-cover" />
+              </button>
             ))}
           </div>
-          <div className="flex-1 border border-gray-600 rounded-md overflow-hidden h-[400px] md:h-[500px] lg:h-[600px]">
-            <img
-              src={image}
-              alt="product-main"
-              className="w-full h-full object-contain bg-[#1a1a1a]"
-            />
+          <div className="flex-1 aspect-[4/5] rounded-soft overflow-hidden bg-[var(--background-subtle)] border border-[var(--border-base)]">
+            <img src={mainImage} alt={productData.name} className="w-full h-full object-cover" />
           </div>
         </div>
 
-        {/* Product Info Section */}
-        <div className="flex flex-col gap-6 lg:w-1/2 text-white">
-          <h1 className="text-3xl md:text-4xl font-bold">{productData.name.toUpperCase()}</h1>
-          
-          <div className="flex items-center gap-1">
-            <div className="flex text-yellow-400">
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              <FaStarHalfAlt />
+        {/* Right: Product Info */}
+        <div className="flex flex-col gap-8">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 block">
+              {productData.category} / {productData.subCategory}
+            </span>
+            <h1 className="text-4xl font-bold tracking-tight mb-4">{productData.name}</h1>
+            <div className="flex items-center gap-4">
+              <div className="flex text-yellow-400">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <HiStar key={i} className="w-5 h-5 fill-current" />
+                ))}
+              </div>
+              <span className="text-sm text-[var(--text-muted)]">(124 Reviews)</span>
             </div>
-            <p className="text-gray-300 ml-2">(124 verified ratings)</p>
           </div>
 
-          <p className="text-3xl font-semibold">
-            {currency} {productData.price}
-          </p>
-
-          <p className="text-gray-300 text-lg leading-relaxed">
+          <p className="text-3xl font-medium">{currency}{productData.price}</p>
+          
+          <p className="text-[var(--text-muted)] leading-relaxed max-w-xl">
             {productData.description}
           </p>
 
-          {/* Conditional Size Selector */}
-          {['clothing', 'men', 'women', 'kids'].includes(productData.category.toLowerCase()) && (
-            <div className="flex flex-col gap-3 my-4">
-              <p className="text-xl font-semibold">Select Size</p>
-              <div className="flex gap-3 flex-wrap">
-                {processedSizes.map((item, index) => (
+          {/* Size Selector */}
+          {isClothing && productData.sizes && (
+            <div className="flex flex-col gap-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider">Select Size</h3>
+              <div className="flex flex-wrap gap-3">
+                {productData.sizes.map((size) => (
                   <button
-                    key={index}
-                    className={`py-3 px-6 border rounded-md transition-all duration-200 text-lg font-medium min-w-[60px]
-                    ${item === size 
-                      ? "bg-white text-black border-white shadow-[0_0_10px_rgba(255,255,255,0.5)] scale-105" 
-                      : "bg-[#ffffff05] text-gray-300 border-gray-600 hover:bg-[#ffffff15] hover:border-gray-400"}`}
-                    onClick={() => setSize(item)}>
-                    {item}
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`min-w-[56px] h-12 flex items-center justify-center px-4 rounded-soft border text-sm font-medium transition-all ${
+                      selectedSize === size 
+                        ? 'bg-[var(--brand-primary)] text-[var(--background-base)] border-[var(--brand-primary)] shadow-md' 
+                        : 'border-[var(--border-base)] text-[var(--text-base)] hover:border-[var(--brand-secondary)]'
+                    }`}
+                  >
+                    {size}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          <button
-            className="w-full md:w-auto bg-white text-black font-bold py-4 px-10 rounded-full mt-4 hover:bg-gray-200 transition-all active:scale-95 shadow-xl text-lg"
-            onClick={handleAddToCart}>
-            {loading ? <Loading /> : "ADD TO CART"}
-          </button>
-
-          <div className="w-full h-[1px] bg-gray-700 my-4"></div>
-          
-          <div className="text-sm text-gray-400 space-y-1">
-            <p>✓ 100% Original Product.</p>
-            <p>✓ Cash on delivery is available on this product</p>
-            <p>✓ Easy return and exchange policy within 7 days</p>
+          <div className="flex flex-col gap-4">
+            <Button size="lg" className="w-full md:w-64 py-4 rounded-full" onClick={handleAddToCart} disabled={loading}>
+              {loading ? 'Adding...' : 'Add to Cart'}
+            </Button>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-8 border-t border-[var(--border-base)]">
+              <div className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
+                <HiOutlineCheckCircle className="w-5 h-5 text-green-500" />
+                <span>100% Original product</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
+                <HiOutlineCheckCircle className="w-5 h-5 text-green-500" />
+                <span>Cash on delivery available</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Description & Reviews Section */}
-      <div className="w-full max-w-7xl px-4 md:px-10 mt-20">
-        <div className="flex border-b border-gray-700">
-          <button className="px-6 py-3 text-sm font-bold text-white border-b-2 border-white">Description</button>
-          <button className="px-6 py-3 text-sm text-gray-400 hover:text-white">Reviews (124)</button>
+      {/* Description & Reviews Tabs */}
+      <div className="mt-24">
+        <div className="flex border-b border-[var(--border-base)] mb-8">
+          <button className="px-8 py-4 text-sm font-bold border-b-2 border-[var(--brand-primary)]">Description</button>
+          <button className="px-8 py-4 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-base)]">Reviews (124)</button>
         </div>
-
-        <div className="py-6 text-gray-300 text-sm md:text-base leading-relaxed border border-gray-700 p-6 mt-4 rounded-md bg-[#ffffff05]">
+        <div className="max-w-3xl text-[var(--text-muted)] leading-relaxed space-y-4">
           <p>
-            Upgrade your wardrobe with this stylish slim-fit cotton shirt, available now on Velviera. Crafted from
-            breathable, high-quality fabric, it offers all-day comfort and effortless style. Easy to maintain and
-            perfect for any setting, this shirt is a must-have essential for those who value both fashion and function.
+            Experience the perfect blend of style and sustainability with the {productData.name}. Meticulously crafted using premium materials, this piece is designed to withstand the test of time while keeping you at the forefront of contemporary fashion.
           </p>
-        </div>
-
-        <div className="mt-10">
-          <RelatedProduct
-            category={productData.category}
-            subCategory={productData.subCategory}
-            currentProductId={productData._id}
-          />
+          <p>
+            Whether you're dressing for a casual day out or a refined evening event, its versatile silhouette and superior comfort make it an essential addition to any curated wardrobe.
+          </p>
         </div>
       </div>
     </div>
-  ) : (
-    <div className="w-full min-h-screen bg-[#141414]"></div>
   );
-}
+};
 
 export default ProductDetail;

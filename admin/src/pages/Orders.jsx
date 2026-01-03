@@ -1,100 +1,140 @@
-import React from 'react'
-import Nav from '../component/Nav'
-import Sidebar from '../component/Sidebar'
-import { useState } from 'react'
-import { useContext } from 'react'
-import { authDataContext } from '../context/AuthContext'
-import axios from 'axios'
-import { useEffect } from 'react'
-import { SiEbox } from "react-icons/si";
+import React, { useState, useContext, useEffect } from 'react';
+import { authDataContext } from '../context/AuthContext';
+import axios from 'axios';
+import Card from '../components/ui/Card';
+import { HiOutlineShoppingBag, HiOutlineMapPin, HiOutlinePhone, HiOutlineCalendarDays } from "react-icons/hi2";
+import { toast } from 'react-toastify';
 
-function Orders() {
+const Orders = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { serverUrl } = useContext(authDataContext);
 
-  let [orders,setOrders] = useState([])
-  let {serverUrl} = useContext(authDataContext)
-
-    const fetchAllOrders =async () => {
+  const fetchAllOrders = async () => {
     try {
-      const result = await axios.post(serverUrl + '/api/order/list' , {} ,{withCredentials:true})
-      setOrders(result.data.reverse())
-      
+      const response = await axios.post(`${serverUrl}/api/order/list`, {}, { withCredentials: true });
+      if (response.data) {
+        setOrders(response.data.reverse());
+      }
     } catch (error) {
-      console.log(error)
+      toast.error("Failed to fetch orders");
+    } finally {
+      setLoading(false);
     }
-    
-  }
-   const statusHandler = async (e , orderId) => {
-         try {
-          const result = await axios.post(serverUrl + '/api/order/status' , {orderId,status:e.target.value},{withCredentials:true})
-          if(result.data){
-            await fetchAllOrders()
-          }
-         } catch (error) {
-          console.log(error)
-          
-         }
-  }
-  useEffect(()=>{
-    fetchAllOrders()
-  },[])
+  };
+
+  const statusHandler = async (e, orderId) => {
+    try {
+      const response = await axios.post(`${serverUrl}/api/order/status`, { orderId, status: e.target.value }, { withCredentials: true });
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Order status updated");
+        await fetchAllOrders();
+      }
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
+  };
+
+  useEffect(() => {
+    fetchAllOrders();
+  }, []);
+
   return (
-    <div className='w-[99vw] min-h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-[white]'>
-      
-      <Nav/>
-      <div className='w-[100%] h-[100%] flex items-center lg:justify-start justify-center'>
-        <Sidebar/>
-        <div className='lg:w-[85%] md:w-[70%] h-[100%] lg:ml-[310px] md:ml-[250px] mt-[70px] flex flex-col gap-[30px] overflow-x-hidden py-[50px] ml-[100px]'>
-          <div className='w-[400px] h-[50px] text-[28px] md:text-[40px] mb-[20px] text-white'>All Orders List</div>
-          {
-           orders.map((order,index)=>(
-            <div key={index} className='w-[90%] h-[40%] bg-slate-600 rounded-xl flex lg:items-center items-start justify-between  flex-col lg:flex-row p-[10px] md:px-[20px]  gap-[20px]'>
-            <SiEbox  className='w-[60px] h-[60px] text-[black] p-[5px] rounded-lg bg-[white]'/>
+    <div className="flex flex-col gap-8 pb-12">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Orders Management</h1>
+        <p className="text-[var(--text-muted)] text-sm">Monitor and update the fulfillment status of all customer orders.</p>
+      </div>
 
-            <div>
-              <div className='flex items-start justify-center flex-col gap-[5px] text-[16px] text-[#56dbfc]'>
-                {
-                  order.items.map((item,index)=>{
-                    if(index === order.items.length - 1){
-                       return <p key={index}>{item.name.toUpperCase()}  *  {item.quantity} <span>{item.size}</span></p>
-
-                    }else{
-                       return <p key={index}>{item.name.toUpperCase()}  *  {item.quantity} <span>{item.size}</span>,</p>
-
-                    }
-                  })
-                }
+      <div className="flex flex-col gap-6">
+        {loading ? (
+          [1, 2, 3].map(i => <Card key={i} className="animate-pulse h-48" />)
+        ) : orders.length > 0 ? (
+          orders.map((order, index) => (
+            <Card key={index} className="flex flex-col lg:flex-row gap-8 items-start relative">
+              <div className="flex-shrink-0 p-4 bg-[var(--background-subtle)] rounded-soft text-[var(--brand-primary)]">
+                <HiOutlineShoppingBag className="w-10 h-10" />
               </div>
 
-              <div className='text-[15px] text-green-100'>
-                  <p>{order.address.firstName+" "+ order.address.lastName}</p>
-                  <p>{order.address.street + ", "}</p>
-                  <p>{order.address.city + ", " + order.address.state + ", " + order.address.country + ", " + order.address.pinCode}</p>
-                  <p>{order.address.phone}</p>
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+                {/* Items & Customer */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    {order.items.map((item, idx) => (
+                      <p key={idx} className="text-sm font-bold">
+                        {item.name} <span className="text-[var(--text-muted)]">× {item.quantity}</span> 
+                        <span className="ml-1 text-[10px] px-1.5 py-0.5 bg-[var(--background-subtle)] border border-[var(--border-base)] rounded-sm">{item.size}</span>
+                      </p>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-col gap-1">
+                    <p className="text-sm font-bold">{order.address.firstName} {order.address.lastName}</p>
+                    <div className="flex items-start gap-2 text-xs text-[var(--text-muted)]">
+                      <HiOutlineMapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span>{order.address.street}, {order.address.city}, {order.address.state}, {order.address.country} - {order.address.pinCode}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                      <HiOutlinePhone className="w-4 h-4 flex-shrink-0" />
+                      <span>{order.address.phone}</span>
+                    </div>
+                  </div>
                 </div>
-            </div>
-            <div className='text-[15px] text-green-100'>
-                  <p>Items : {order.items.length}</p>
-                  <p>Method : {order.paymentMethod}</p>
-                  <p>Payment : {order.payment ? 'Done' : 'Pending'}</p>
-                  <p>Date : {new Date(order.date).toLocaleDateString()}</p>
-                   <p className='text-[20px] text-[white]'> ₹ {order.amount}</p>
-                </div>
-                <select  value={order.status} className='px-[5px] py-[10px] bg-slate-500 rounded-lg border-[1px] border-[#96eef3]' onChange={(e)=>statusHandler(e,order._id)} >
-                  <option value="Order Placed">Order Placed</option>
-                  <option value="Packing">Packing</option>
-                  <option value="Shipped">Shipped</option>
-                  <option value="Out for delivery">Out for delivery</option>
-                  <option value="Delivered">Delivered</option>
-                </select>
-            </div>
-            
-           ))
 
-          }
-        </div>
+                {/* Logistics Info */}
+                <div className="flex flex-col gap-3 text-sm">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-4 text-[var(--text-muted)]">
+                      <span className="w-20 font-medium">Items</span>
+                      <span className="font-bold text-[var(--text-base)]">{order.items.length}</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-[var(--text-muted)]">
+                      <span className="w-20 font-medium">Method</span>
+                      <span className="font-bold text-[var(--text-base)] uppercase tracking-tight">{order.paymentMethod}</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-[var(--text-muted)]">
+                      <span className="w-20 font-medium">Payment</span>
+                      <span className={`font-bold ${order.payment ? 'text-green-600' : 'text-orange-500'}`}>
+                        {order.payment ? 'Done' : 'Pending'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-[var(--text-muted)]">
+                      <HiOutlineCalendarDays className="w-4 h-4" />
+                      <span className="font-medium">{new Date(order.date).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Amount & Status Selection */}
+                <div className="flex flex-col md:items-end justify-between gap-6">
+                  <p className="text-2xl font-bold tracking-tight">₹{order.amount}</p>
+                  
+                  <div className="w-full md:w-48">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1 block pl-1">Order Status</label>
+                    <select 
+                      value={order.status} 
+                      onChange={(e) => statusHandler(e, order._id)}
+                      className="w-full px-3 py-2 bg-[var(--background-base)] border border-[var(--border-base)] rounded-soft text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+                    >
+                      <option value="Order Placed">Order Placed</option>
+                      <option value="Packing">Packing</option>
+                      <option value="Shipped">Shipped</option>
+                      <option value="Out for delivery">Out for delivery</option>
+                      <option value="Delivered">Delivered</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <div className="py-24 text-center border-2 border-dashed border-[var(--border-base)] rounded-soft">
+            <h3 className="text-lg font-medium mb-2">No orders found</h3>
+            <p className="text-[var(--text-muted)]">All customer orders will appear here.</p>
+          </div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Orders
+export default Orders;

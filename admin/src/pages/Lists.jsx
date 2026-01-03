@@ -1,85 +1,114 @@
-import React, { useContext, useEffect, useState } from 'react'
-import Nav from '../component/Nav'
-import Sidebar from '../component/Sidebar'
-import { authDataContext } from '../context/AuthContext'
-import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react';
+import { authDataContext } from '../context/AuthContext';
+import axios from 'axios';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import { HiOutlineTrash, HiOutlineCube } from "react-icons/hi2";
+import { toast } from 'react-toastify';
 
-function Lists() {
-  let [list ,setList] = useState([])
-  let {serverUrl} = useContext(authDataContext)
-
+const Lists = () => {
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { serverUrl } = useContext(authDataContext);
 
   const fetchList = async () => {
     try {
-      let result = await axios.get(serverUrl + "/api/product/list" )
-      setList(result.data)
-      console.log(result.data)
+      const response = await axios.get(`${serverUrl}/api/product/list`);
+      setList(response.data || []);
     } catch (error) {
-      console.log(error)
+      toast.error("Failed to fetch product list");
+    } finally {
+      setLoading(false);
     }
-    
-  }
+  };
 
   const removeList = async (id) => {
-
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    
     try {
-      let result = await axios.post(`${serverUrl}/api/product/remove/${id}`,{},{withCredentials:true})
-
-      if(result.data){
-        fetchList()
-      }
-      else{
-        console.log("Failed to remove Product")
+      const response = await axios.post(`${serverUrl}/api/product/remove/${id}`, {}, { withCredentials: true });
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Product removed successfully");
+        fetchList();
+      } else {
+        toast.error(response.data.message);
       }
     } catch (error) {
-      console.log(error)
+      toast.error("Failed to remove product");
     }
-    
-  }
+  };
 
-  useEffect(()=>{
-   fetchList()
-  },[])
+  useEffect(() => {
+    fetchList();
+  }, []);
+
   return (
-    <div className='w-[100vw] min-h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-[white]'>
-      <Nav/>
-      <div className='w-[100%] h-[100%] flex items-center justify-start'>
-        <Sidebar/>
-
-        <div className='w-[82%] h-[100%] lg:ml-[320px] md:ml-[230px] mt-[70px] flex flex-col gap-[30px] overflow-x-hidden py-[50px] ml-[100px]'>
-          <div className='w-[400px] h-[50px] text-[28px] md:text-[40px] mb-[20px] text-white'>All Listed Products</div>
-
-
-          {
-            list?.length > 0 ? (
-              list.map((item,index)=>(
-                <div className='w-[90%] md:h-[120px] h-[90px] bg-slate-600 rounded-xl flex items-center justify-start gap-[5px] md:gap-[30px] p-[10px] md:px-[30px]' key={index}>
-                  <img src={item.image1} className='w-[30%] md:w-[120px] h-[90%] rounded-lg' alt="" />
-                  <div className='w-[90%] h-[80%] flex flex-col items-start justify-center gap-[2px]'>
-
-                    <div className='w-[100%] md:text-[20px] text-[15px] text-[#bef0f3]'>{item.name}</div>
-                     <div className='md:text-[17px] text-[15px] text-[#bef3da]'>{item.category}</div>
-                  <div className='md:text-[17px] text-[15px] text-[#bef3da]'>₹{item.price}</div>
-
-                  </div>
-                  <div className='w-[10%] h-[100%] bg-transparent flex items-center justify-center'>
-                    <span className='w-[35px] h-[30%] flex items-center justify-center rounded-md md:hover:bg-red-300 md:hover:text-black cursor-pointer' onClick={()=>removeList(item._id)}>X</span>
-                  </div>
-                 
-
-                </div>
-              ))
-            )
-
-            : (
-              <div className='text-white text-lg'>No products available.</div>
-            )
-          }
+    <div className="flex flex-col gap-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Product List</h1>
+          <p className="text-[var(--text-muted)] text-sm">Manage your inventory and product visibility.</p>
         </div>
+        <p className="text-sm font-bold text-[var(--brand-primary)] bg-[var(--background-base)] px-4 py-2 border border-[var(--border-base)] rounded-full">
+          {list.length} Products
+        </p>
+      </div>
 
+      <div className="grid grid-cols-1 gap-4">
+        {loading ? (
+          [1, 2, 3].map(i => (
+            <Card key={i} className="animate-pulse h-24" />
+          ))
+        ) : list.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            {/* Table Header (Desktop) */}
+            <div className="hidden md:grid grid-cols-[80px_1fr_120px_120px_60px] gap-6 px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
+              <span>Image</span>
+              <span>Name</span>
+              <span>Category</span>
+              <span>Price</span>
+              <span className="text-right">Action</span>
+            </div>
+
+            {list.map((item) => (
+              <Card key={item._id} padding={false} className="overflow-hidden group">
+                <div className="grid grid-cols-1 md:grid-cols-[80px_1fr_120px_120px_60px] items-center gap-6 p-4 md:p-2 md:px-6">
+                  <div className="w-16 h-16 md:w-12 md:h-12 bg-[var(--background-subtle)] rounded-soft overflow-hidden border border-[var(--border-base)]">
+                    <img src={item.image1} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm md:text-base">{item.name}</span>
+                    <span className="text-xs text-[var(--text-muted)] md:hidden">{item.category}</span>
+                  </div>
+
+                  <span className="hidden md:block text-sm text-[var(--text-muted)]">{item.category}</span>
+                  
+                  <span className="font-bold text-sm">₹{item.price}</span>
+
+                  <div className="flex justify-end">
+                    <button 
+                      onClick={() => removeList(item._id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                      title="Delete Product"
+                    >
+                      <HiOutlineTrash className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="py-24 text-center border-2 border-dashed border-[var(--border-base)] rounded-soft">
+            <HiOutlineCube className="w-12 h-12 text-[var(--border-base)] mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-4">No products found</h3>
+            <Button onClick={() => window.location.href='/admin/add'}>Add Your First Product</Button>
+          </div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Lists
+export default Lists;

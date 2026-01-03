@@ -1,84 +1,90 @@
-import React, { useContext, useEffect, useState } from 'react'
-import Title from '../component/Title'
-import { shopDataContext } from '../context/ShopContext'
-import { authDataContext } from '../context/authContext'
-import axios from 'axios'
+import React, { useContext, useEffect, useState } from 'react';
+import { shopDataContext } from '../context/ShopContext';
+import { userDataContext } from '../context/UserContext';
+import axios from 'axios';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
 
-function Order() {
-    let [orderData,setOrderData] = useState([])
-    let {currency} = useContext(shopDataContext)
-    let {serverUrl} = useContext(authDataContext)
+const Order = () => {
+  const [orderData, setOrderData] = useState([]);
+  const { currency, backendUrl, token } = useContext(shopDataContext);
 
-    const loadOrderData = async () => {
-       try {
-      const result = await axios.post(serverUrl + '/api/order/userorder',{},{withCredentials:true})
-      if(result.data){
-        let allOrdersItem = []
-        result.data.map((order)=>{
-          order.items.map((item)=>{
-            item['status'] = order.status
-            item['payment'] = order.payment
-            item['paymentMethod'] = order.paymentMethod
-            item['date'] = order.date
-            allOrdersItem.push(item)
-          })
-        })
-        setOrderData(allOrdersItem.reverse())
+  const loadOrderData = async () => {
+    try {
+      const response = await axios.post(backendUrl + '/api/order/userorders', {}, { headers: { token } });
+      if (response.data.success) {
+        let allOrdersItem = [];
+        response.data.orders.map((order) => {
+          order.items.map((item) => {
+            item['status'] = order.status;
+            item['payment'] = order.payment;
+            item['paymentMethod'] = order.paymentMethod;
+            item['date'] = order.date;
+            allOrdersItem.push(item);
+          });
+        });
+        setOrderData(allOrdersItem.reverse());
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
+  };
+
+  useEffect(() => {
+    if (token) {
+      loadOrderData();
     }
-
-useEffect(()=>{
- loadOrderData()
-},[])
-
+  }, [token]);
 
   return (
-    <div className='w-[99vw] min-h-[100vh] p-[20px] pb-[150px]  overflow-hidden bg-gradient-to-l from-[#141414] to-[#0c2025] '>
-      <div className='h-[8%] w-[100%] text-center mt-[80px]'>
-        <Title text1={'MY'} text2={'ORDER'} />
+    <div className="container mx-auto px-4 py-12 md:py-20">
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold tracking-tight mb-2">My Orders</h1>
+        <p className="text-sm text-[var(--text-muted)]">Track and manage your recent purchases</p>
       </div>
-      <div className=' w-[100%] h-[92%] flex flex-wrap gap-[20px]'>
-        {
-         orderData.map((item,index)=>(
-            <div key={index} className='w-[100%] h-[10%] border-t border-b '>
-                <div className='w-[100%] h-[80%] flex items-start gap-6 bg-[#51808048]  py-[10px] px-[20px] rounded-2xl relative '>
-                    <img src={item.image1} alt="" className='w-[130px] h-[130px] rounded-md '/>
-                    <div className='flex items-start justify-center flex-col gap-[5px]'>
-                    <p className='md:text-[25px] text-[20px] text-[#f3f9fc]'>{item.name}</p>
-                    <div className='flex items-center gap-[8px]   md:gap-[20px]'>
-                        <p className='md:text-[18px] text-[12px] text-[#aaf4e7]'>{currency} {item.price}</p>
-                      <p className='md:text-[18px] text-[12px] text-[#aaf4e7]'>Quantity: {item.quantity}</p>
-                      <p className='md:text-[18px] text-[12px] text-[#aaf4e7]'>Size: {item.size}</p>
-                    </div>
-                    <div className='flex items-center'>
-                     <p className='md:text-[18px] text-[12px] text-[#aaf4e7]'>Date: <span className='text-[#e4fbff] pl-[10px] md:text-[16px] text-[11px]'>{new Date(item.date).toDateString()}</span></p>
-                    </div>
-                    <div className='flex items-center'>
-                      <p className='md:text-[16px] text-[12px] text-[#aaf4e7]'>Payment Method :{item.paymentMethod}</p>
-                    </div>
-                    <div className='absolute md:left-[55%] md:top-[40%] right-[2%] top-[2%]  '>
-                        <div className='flex items-center gap-[5px]'>
-                      <p className='min-w-2 h-2 rounded-full bg-green-500'></p> 
-                      <p className='md:text-[17px] text-[10px] text-[#f3f9fc]'>{item.status}</p>
 
-                    </div>
-
-                    </div>
-                     <div className='absolute md:right-[5%] right-[1%] md:top-[40%] top-[70%]'> 
-                    <button className='md:px-[15px] px-[5px] py-[3px] md:py-[7px] rounded-md bg-[#101919] text-[#f3f9fc] text-[12px] md:text-[16px] cursor-pointe active:bg-slate-500' onClick={loadOrderData} >Track Order</button>
+      <div className="flex flex-col gap-4">
+        {orderData.length > 0 ? (
+          orderData.map((item, index) => (
+            <Card key={index} padding={false} className="flex flex-col md:flex-row items-center overflow-hidden">
+              <div className="w-full md:w-32 aspect-square bg-[var(--background-subtle)]">
+                <img src={item.image1} alt={item.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-bold text-lg leading-tight">{item.name}</h3>
+                  <div className="flex items-center gap-4 text-sm text-[var(--text-muted)]">
+                    <span>{currency}{item.price}</span>
+                    <span>Qty: {item.quantity}</span>
+                    <span>Size: {item.size}</span>
                   </div>
-                    </div>
+                  <p className="text-xs text-[var(--text-muted)] mt-1 uppercase tracking-wider font-medium">
+                    Date: {new Date(item.date).toDateString()}
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                    Payment: <span className="font-bold">{item.paymentMethod}</span>
+                  </p>
                 </div>
-               
-            </div>
-         ))
-        }
+
+                <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${item.status === 'Delivered' ? 'bg-green-500' : 'bg-orange-400 animate-pulse'}`}></span>
+                    <span className="text-sm font-medium">{item.status}</span>
+                  </div>
+                  <Button variant="secondary" size="sm" onClick={loadOrderData}>Track Order</Button>
+                </div>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <div className="py-24 text-center border-2 border-dashed border-[var(--border-base)] rounded-soft">
+            <h3 className="text-xl font-medium mb-2">No orders yet</h3>
+            <p className="text-[var(--text-muted)]">When you buy something, it will appear here.</p>
+          </div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Order
+export default Order;

@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Registration from './pages/Registration'
 import Home from './pages/Home'
 import Login from './pages/Login'
-import Nav from './component/Nav'
+import MainLayout from './components/layout/MainLayout'
 import { userDataContext } from './context/UserContext'
 import About from './pages/About'
 import Collections from './pages/Collections'
@@ -21,9 +21,7 @@ let {userData} = useContext(userDataContext)
 let location = useLocation()
   
   return (
-    <>
-    <ToastContainer />
-    {userData && <Nav/>}
+    <MainLayout>
       <Routes>
 
         <Route path='/login' 
@@ -63,7 +61,7 @@ let location = useLocation()
         <Route path='*' element={<NotFound/>}/>
       </Routes>
       <Ai/>
-    </>
+    </MainLayout>
   )
 }
 

@@ -5,6 +5,7 @@ import Add from './pages/Add'
 import Lists from './pages/Lists'
 import Orders from './pages/Orders'
 import Login from './pages/Login'
+import SidebarLayout from './components/layout/SidebarLayout'
 import { adminDataContext } from './context/AdminContext'
   import { ToastContainer, toast } from 'react-toastify';
 
@@ -14,17 +15,17 @@ function App() {
 
     <>
       <ToastContainer />
-    {!adminData ? <Login/> : <>
-
-      <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/add' element={<Add/>}/>
-        <Route path='/lists' element={<Lists/>}/>
-        <Route path='/orders' element={<Orders/>}/>
-        <Route path='/login' element={<Login/>}/>
-      </Routes>
-      </>
-      }
+    {!adminData ? <Login/> : (
+      <SidebarLayout>
+        <Routes>
+          <Route path='/' element={<Home/>}/>
+          <Route path='/add' element={<Add/>}/>
+          <Route path='/lists' element={<Lists/>}/>
+          <Route path='/orders' element={<Orders/>}/>
+          <Route path='/login' element={<Login/>}/>
+        </Routes>
+      </SidebarLayout>
+    )}
     </>
   )
 }

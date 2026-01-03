@@ -1,180 +1,221 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { FaChevronRight, FaChevronLeft, FaChevronDown } from "react-icons/fa";
-import Title from '../component/Title';
+import React, { useContext, useEffect, useState } from 'react';
+import { HiOutlineAdjustmentsHorizontal, HiOutlineChevronRight, HiOutlineChevronLeft, HiOutlineChevronDown } from "react-icons/hi2";
 import { shopDataContext } from '../context/ShopContext';
-import Card from '../component/Card';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import { Link } from 'react-router-dom';
 
-function Collections() {
+const Collections = () => {
+  const { products, search, showSearch } = useContext(shopDataContext);
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterProduct, setFilterProduct] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [subCategory, setSubCategory] = useState([]);
+  const [sortType, setSortType] = useState("relevant");
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
-    let [showFilter,setShowFilter] = useState(false)
-    let {products,search,showSearch} = useContext(shopDataContext)
-    let [filterProduct,setFilterProduct] = useState([])
-    let [category,setCaterory] = useState([])
-    let [subCategory,setSubCaterory] = useState([])
-    let [sortType,SetSortType] = useState("relavent")
+  const toggleCategory = (value) => {
+    setCategory(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
+  };
 
-    // Pagination State
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20;
+  const toggleSubCategory = (value) => {
+    setSubCategory(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
+  };
 
-    const toggleCategory = (e) =>{
-        if(category.includes(e.target.value)){
-            setCaterory(prev => prev.filter(item => item !== e.target.value))
-        }else
-         {
-            setCaterory(prev => [...prev,e.target.value])
-         }
+  const applyFilter = () => {
+    let productCopy = products?.slice() || [];
+
+    if (showSearch && search) {
+      productCopy = productCopy.filter(item => item.name.toLowerCase().includes(search.toLowerCase()));
+    }
+    if (category.length > 0) {
+      productCopy = productCopy.filter(item => category.includes(item.category));
+    }
+    if (subCategory.length > 0) {
+      productCopy = productCopy.filter(item => subCategory.includes(item.subCategory));
     }
 
-    const toggleSubCategory = (e) =>{
-         if(subCategory.includes(e.target.value)){
-            setSubCaterory(prev => prev.filter(item => item !== e.target.value))
-        }else
-         {
-            setSubCaterory(prev => [...prev,e.target.value])
-         }
-    }
-
-    const applyFilter = ()=>{
-        let productCopy = products.slice()
-
-        if(showSearch && search){
-            productCopy = productCopy.filter(item => item.name.toLowerCase().includes(search.toLowerCase()))
-        }
-        if(category.length > 0)
-        {
-            productCopy = productCopy.filter(item => category.includes(item.category))
-        }
-        if(subCategory.length > 0)
-        {
-            productCopy = productCopy.filter(item => subCategory.includes(item.subCategory))
-        }
-        setFilterProduct(productCopy)
-    }
-
-
-    const sortProducts = (e)=>{
-        let fbCopy = filterProduct.slice()
-
-        switch(sortType){
-         case 'low-high':
-            setFilterProduct(fbCopy.sort((a,b)=>(a.price - b.price)))
+    // Apply Sorting
+    switch (sortType) {
+      case 'low-high':
+        productCopy.sort((a, b) => a.price - b.price);
         break;
-
-         case 'high-low':
-            setFilterProduct(fbCopy.sort((a,b)=>(b.price - a.price)))
+      case 'high-low':
+        productCopy.sort((a, b) => b.price - a.price);
         break;
-        default:
-            applyFilter()
+      default:
+        // Keep as relevant/default
         break;
-        }
-
     }
 
-    useEffect(()=>{
-        sortProducts()
-    },[sortType])
+    setFilterProduct(productCopy);
+  };
 
+  useEffect(() => {
+    applyFilter();
+    setCurrentPage(1);
+  }, [category, subCategory, search, showSearch, sortType, products]);
 
-    useEffect(()=>{
-    setFilterProduct(products)
-    },[products])
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProducts = filterProduct.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filterProduct.length / itemsPerPage);
 
-    useEffect(()=>{
-        applyFilter();
-        setCurrentPage(1); // Reset to page 1 when filters change
-    },[category,subCategory,search ,showSearch])
-
-    // Pagination Logic
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentProducts = filterProduct.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(filterProduct.length / itemsPerPage);
-
-    const paginate = (pageNumber) => {
-        setCurrentPage(pageNumber);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
-    <div className='w-[99vw]  min-h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] flex items-start flex-col md:flex-row justify-start  pt-[70px] overflow-x-hidden z-[2] pb-[110px]'>
-      <div className={`md:w-[30vw] lg:w-[20vw] w-[100vw] md:min-h-[100vh] ${showFilter ? "h-[45vh]" :"h-[8vh]"}  p-[20px] border-r-[1px] border-gray-400  text-[#aaf5fa] lg:fixed `}>
-        <p className='text-[25px] font-semibold flex gap-[5px] items-center justify-start cursor-pointer' onClick={()=>setShowFilter(prev=>!prev)}>FILTERS
-            {!showFilter && <FaChevronRight className='text-[18px] md:hidden'  />}
-           {showFilter && <FaChevronDown className='text-[18px] md:hidden'  />}
-        </p>
-        
+    <div className="container mx-auto px-4 py-12 flex flex-col md:flex-row gap-12">
+      {/* Sidebar Filters */}
+      <aside className="w-full md:w-64 flex flex-col gap-8">
+        <div>
+          <button 
+            onClick={() => setShowFilter(!showFilter)}
+            className="flex items-center justify-between w-full md:cursor-default"
+          >
+            <h2 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+              <HiOutlineAdjustmentsHorizontal className="w-5 h-5" />
+              Filters
+            </h2>
+            <HiOutlineChevronDown className={`w-4 h-4 md:hidden transition-transform ${showFilter ? 'rotate-180' : ''}`} />
+          </button>
 
-        <div className={`border-[2px] border-[#dedcdc] pl-5 py-3 mt-6 rounded-md bg-slate-600 ${showFilter ? "" : "hidden"} md:block`}>
-            <p className='text-[18px] text-[#f8fafa]'>CATEGORIES</p>
-            <div className='w-[230px] h-[120px]  flex items-start justify-center gap-[10px] flex-col'>
-                <p className='flex items-center justify-center gap-[10px] text-[16px] font-light'> <input type="checkbox" value={'Men'} className='w-3' onChange={toggleCategory} /> Men</p>
-                 <p className='flex items-center justify-center gap-[10px] text-[16px] font-light'> <input type="checkbox" value={'Women'} className='w-3' onChange={toggleCategory} /> Women</p>
-                  <p className='flex items-center justify-center gap-[10px] text-[16px] font-light'> <input type="checkbox" value={'Kids'} onChange={toggleCategory} className='w-3' /> Kids</p>
+          <div className={`${showFilter ? 'flex' : 'hidden md:flex'} flex-col gap-8 mt-6`}>
+            {/* Category Filter */}
+            <div className="flex flex-col gap-4">
+              <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Categories</h3>
+              <div className="flex flex-col gap-3">
+                {['Men', 'Women', 'Kids'].map((cat) => (
+                  <label key={cat} className="flex items-center gap-3 text-sm cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      value={cat} 
+                      checked={category.includes(cat)}
+                      onChange={(e) => toggleCategory(e.target.value)}
+                      className="w-4 h-4 rounded border-[var(--border-base)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                    />
+                    <span className="group-hover:text-[var(--brand-primary)] transition-colors">{cat}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-        </div>
-        <div className={`border-[2px] border-[#dedcdc] pl-5 py-3 mt-6 rounded-md bg-slate-600 ${showFilter ? "" : "hidden"} md:block`}>
-            <p className='text-[18px] text-[#f8fafa]'>SUB-CATEGORIES</p>
-            <div className='w-[230px] h-[120px]  flex items-start justify-center gap-[10px] flex-col'>
-                <p className='flex items-center justify-center gap-[10px] text-[16px] font-light'> <input type="checkbox" value={'TopWear'} className='w-3' onChange={toggleSubCategory} /> TopWear</p>
-                 <p className='flex items-center justify-center gap-[10px] text-[16px] font-light'> <input type="checkbox" value={'BottomWear'} className='w-3' onChange={toggleSubCategory} /> BottomWear</p>
-                  <p className='flex items-center justify-center gap-[10px] text-[16px] font-light'> <input type="checkbox" value={'WinterWear'} className='w-3' onChange={toggleSubCategory} /> WinterWear</p>
+
+            {/* Sub-Category Filter */}
+            <div className="flex flex-col gap-4">
+              <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Type</h3>
+              <div className="flex flex-col gap-3">
+                {['TopWear', 'BottomWear', 'WinterWear'].map((sub) => (
+                  <label key={sub} className="flex items-center gap-3 text-sm cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      value={sub} 
+                      checked={subCategory.includes(sub)}
+                      onChange={(e) => toggleSubCategory(e.target.value)}
+                      className="w-4 h-4 rounded border-[var(--border-base)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                    />
+                    <span className="group-hover:text-[var(--brand-primary)] transition-colors">{sub}</span>
+                  </label>
+                ))}
+              </div>
             </div>
+          </div>
         </div>
-      </div>
-      <div className='lg:pl-[20%] md:py-[10px] w-full'>
-        <div className=' md:w-[80vw] w-[100vw]    flex  justify-between flex-col lg:flex-row lg:px-[50px] '>
-            <Title text1={"ALL"} text2={"COLLECTIONS"}/>
+      </aside>
 
-            <select name="" id="" className='bg-slate-600 w-[60%] md:w-[200px] h-[50px] px-[10px] text-[white] rounded-lg hover:border-[#46d1f7] border-[2px]' onChange={(e)=>SetSortType(e.target.value)}>
-                <option value="relavent" className='w-[100%] h-[100%]'>Sort By: Relavent</option>
-                <option value="low-high" className='w-[100%] h-[100%]'>Sort By: Low to High</option>
-                <option value="high-low" className='w-[100%] h-[100%]'>Sort By: High to Low</option>
-            </select>
-        </div>
-        <div className='lg:w-[80vw] md:w-[60vw]   w-[100vw] min-h-[70vh] flex items-center justify-center flex-wrap gap-[30px]'>
-            {
-             currentProducts.map((item,index)=>(
-                <Card key={index} id={item._id} name={item.name} price={item.price} image={item.image1}/>
-             ))
-            }
+      {/* Main Content */}
+      <div className="flex-1">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">All Collections</h1>
+            <p className="text-sm text-[var(--text-muted)]">{filterProduct.length} Products Found</p>
+          </div>
+          
+          <select 
+            value={sortType}
+            onChange={(e) => setSortType(e.target.value)}
+            className="bg-[var(--background-base)] border border-[var(--border-base)] rounded-soft text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+          >
+            <option value="relevant">Sort by: Relevant</option>
+            <option value="low-high">Price: Low to High</option>
+            <option value="high-low">Price: High to Low</option>
+          </select>
         </div>
 
-        {/* Pagination Controls */}
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+          {currentProducts.map((item) => (
+            <Link key={item._id} to={`/productdetail/${item._id}`} className="group">
+              <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-soft bg-[var(--background-subtle)] border border-[var(--border-base)]">
+                <img 
+                  src={item.image1} 
+                  alt={item.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </div>
+              <h3 className="text-sm font-medium mb-1 group-hover:underline underline-offset-2">{item.name}</h3>
+              <p className="text-sm text-[var(--text-muted)]">${item.price}</p>
+            </Link>
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {filterProduct.length === 0 && (
+          <div className="py-24 text-center">
+            <h3 className="text-lg font-medium mb-2">No products found</h3>
+            <p className="text-[var(--text-muted)] mb-8">Try adjusting your filters or search query.</p>
+            <Button variant="secondary" onClick={() => { setCategory([]); setSubCategory([]); }}>Clear All Filters</Button>
+          </div>
+        )}
+
+        {/* Pagination */}
         {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-4 mt-10 mb-10 w-full">
+          <div className="flex justify-center items-center gap-2 mt-16">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              disabled={currentPage === 1}
+              onClick={() => paginate(currentPage - 1)}
+              className="p-2"
+            >
+              <HiOutlineChevronLeft className="w-5 h-5" />
+            </Button>
+            
+            <div className="flex gap-1">
+              {Array.from({ length: totalPages }, (_, i) => (
                 <button
-                    onClick={() => paginate(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`p-3 rounded-full border transition-all duration-200 ${currentPage === 1 ? 'border-gray-600 text-gray-600 cursor-not-allowed' : 'border-white text-white hover:bg-white hover:text-black cursor-pointer'}`}
+                  key={i + 1}
+                  onClick={() => paginate(i + 1)}
+                  className={`w-9 h-9 flex items-center justify-center rounded-soft text-sm font-medium transition-colors ${
+                    currentPage === i + 1 
+                      ? 'bg-[var(--brand-primary)] text-[var(--background-base)]' 
+                      : 'hover:bg-[var(--background-subtle)] text-[var(--text-muted)]'
+                  }`}
                 >
-                    <FaChevronLeft />
+                  {i + 1}
                 </button>
-                
-                <div className="flex gap-2 flex-wrap justify-center">
-                    {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                            key={i + 1}
-                            onClick={() => paginate(i + 1)}
-                            className={`w-10 h-10 flex items-center justify-center rounded-md border transition-all duration-200 ${currentPage === i + 1 ? 'bg-white text-black border-white font-bold scale-110' : 'border-gray-600 text-gray-300 hover:border-white hover:text-white'}`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                </div>
-
-                <button
-                    onClick={() => paginate(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`p-3 rounded-full border transition-all duration-200 ${currentPage === totalPages ? 'border-gray-600 text-gray-600 cursor-not-allowed' : 'border-white text-white hover:bg-white hover:text-black cursor-pointer'}`}
-                >
-                    <FaChevronRight />
-                </button>
+              ))}
             </div>
+
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              disabled={currentPage === totalPages}
+              onClick={() => paginate(currentPage + 1)}
+              className="p-2"
+            >
+              <HiOutlineChevronRight className="w-5 h-5" />
+            </Button>
+          </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Collections
+export default Collections;

@@ -1,38 +1,55 @@
-import React from 'react'
-import Title from './Title'
-import { RiExchangeFundsLine } from "react-icons/ri";
-import { TbRosetteDiscountCheckFilled } from "react-icons/tb";
-import { BiSupport } from "react-icons/bi";
+import React from 'react';
+import Title from './Title';
+import { HiOutlineArrowPath, HiOutlineCheckBadge, HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
+import Card from '../components/ui/Card';
 
 function OurPolicy() {
+  const policies = [
+    {
+      icon: HiOutlineArrowPath,
+      title: "Easy Exchange Policy",
+      description: "Exchange Made Easy – Quick, Simple, and Customer-Friendly Process.",
+    },
+    {
+      icon: HiOutlineCheckBadge,
+      title: "7 Days Return Policy",
+      description: "Shop with Confidence – 7 Days Easy Return Guarantee.",
+    },
+    {
+      icon: HiOutlineChatBubbleLeftRight,
+      title: "Best Customer Support",
+      description: "Trusted Customer Support – Your Satisfaction Is Our Priority.",
+    },
+  ];
+
   return (
-    <div className='w-[100vw] h-[100vh] md:h-[70vh] flex items-center justify-start flex-col  bg-gradient-to-l from-[#141414] to-[#0c2025] gap-[50px] '>
-        <div className='h-[8%] w-[100%] text-center mt-[70px] '>
-            <Title text1={"OUR"} text2={"POLICY"}/>
-            <p className='w-[100%] m-auto text-[13px] md:text-[20px] px-[10px] text-blue-100 '>Customer-Friendly Policies – Committed to Your Satisfaction and Safety.</p>
-        </div>
-      <div className='w-[100%] md:min-h-[50%] h-[20%] flex items-center justify-center flex-wrap lg:gap-[50px] gap-[80px]'>
-        <div className='w-[400px] max-w-[90%] h-[60%] flex items-center justify-center flex-col gap-[10px] '>
-        <RiExchangeFundsLine  className='md:w-[60px] w-[30px] h-[30px] md:h-[60px] text-[#90b9ff]'/>
-        <p className='font-semibold md:text-[25px] text-[19px] text-[#a5e8f7]'>Easy Exchange Policy</p>
-        <p className='font-semibold md:text-[18px] text-[12px] text-[aliceblue] text-center'>Exchange Made Easy – Quick, Simple, and Customer-Friendly Process.</p>
-
-        </div>
-        <div className='w-[400px] max-w-[90%] h-[60%] flex items-center justify-center flex-col gap-[10px] '>
-        <TbRosetteDiscountCheckFilled  className='md:w-[60px] w-[30px] h-[30px] md:h-[60px] text-[#90b9ff]'/>
-        <p className='font-semibold md:text-[25px] text-[19px] text-[#a5e8f7]'>7 Days Return Policy</p>
-        <p className='font-semibold md:text-[18px] text-[12px] text-[aliceblue] text-center'>Shop with Confidence – 7 Days Easy Return Guarantee.</p>
-
-        </div>
-        <div className='w-[400px] max-w-[90%] h-[60%] flex items-center justify-center flex-col gap-[10px] '>
-        <BiSupport  className='md:w-[60px] w-[30px] h-[30px] md:h-[60px] text-[#90b9ff]'/>
-        <p className='font-semibold md:text-[25px] text-[19px] text-[#a5e8f7]'>Best Customer Support</p>
-        <p className='font-semibold md:text-[18px] text-[12px] text-[aliceblue] text-center'>Trusted Customer Support – Your Satisfaction Is Our Priority.</p>
-
-        </div>
+    <div className="w-full py-16 md:py-24 flex flex-col items-center gap-16">
+      <div className="text-center flex flex-col gap-4 max-w-2xl">
+        <Title text1="OUR" text2="POLICY" />
+        <p className="text-[var(--text-muted)] text-base md:text-lg">
+          Customer-Friendly Policies – Committed to Your Satisfaction and Safety.
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+        {policies.map((policy, index) => (
+          <Card key={index} className="flex flex-col items-center text-center gap-6 group hover:border-[var(--brand-primary)] transition-all duration-300 py-10">
+            <div className="w-20 h-20 rounded-full bg-[var(--background-subtle)] flex items-center justify-center text-[var(--brand-primary)] group-hover:bg-[var(--brand-primary)] group-hover:text-[var(--background-base)] transition-all duration-300 shadow-soft">
+              <policy.icon className="w-10 h-10" />
+            </div>
+            <div className="flex flex-col gap-3 px-4">
+              <h3 className="font-bold text-xl tracking-tight text-[var(--text-base)]">
+                {policy.title}
+              </h3>
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                {policy.description}
+              </p>
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
-  )
+  );
 }
 
-export default OurPolicy
+export default OurPolicy;

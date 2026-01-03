@@ -1,99 +1,96 @@
 import React, { useContext, useState } from "react";
-import logo from "../assets/logo.png";
-import { IoEyeOutline } from "react-icons/io5";
-import { IoEye } from "react-icons/io5";
+import { HiOutlineEye, HiOutlineEyeSlash } from "react-icons/hi2";
 import axios from "axios";
 import { authDataContext } from "../context/AuthContext";
 import { adminDataContext } from "../context/AdminContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Card from "../components/ui/Card";
 
-function Login() {
-  let [show, setShow] = useState(false);
-  let [email, setEmail] = useState("");
-  let [password, setPassword] = useState("");
-  let { serverUrl } = useContext(authDataContext);
-  let { adminData, getAdmin } = useContext(adminDataContext);
-  let navigate = useNavigate();
+const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { serverUrl } = useContext(authDataContext);
+  const { getAdmin } = useContext(adminDataContext);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const AdminLogin = async (e) => {
-    setLoading(true);
+  const handleAdminLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const result = await axios.post(
-        serverUrl + "/api/auth/adminlogin",
+      const response = await axios.post(
+        `${serverUrl}/api/auth/adminlogin`,
         { email, password },
-        { withCredentials: true },
+        { withCredentials: true }
       );
-      console.log(result.data);
-      toast.success("AdminLogin Successfully");
-      getAdmin();
-      navigate("/");
-      setLoading(false);
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Admin access granted");
+        getAdmin();
+        navigate("/");
+      } else {
+        toast.error(response.data.message);
+      }
     } catch (error) {
-      console.log(error);
-      toast.error("AdminLogin Failed");
+      toast.error("Invalid admin credentials");
+    } finally {
       setLoading(false);
     }
   };
-  return (
-    <div className="w-[100vw] h-[100vh] bg-gradient-to-l from-[#141414] to-[#0c2025] text-[white] flex flex-col items-center justify-start">
-      <div className="w-[100%] h-[80px] flex items-center justify-start px-[30px] gap-[10px] cursor-pointer">
-        <img
-          className="w-[40px]"
-          src={logo}
-          alt=""
-        />
-        <h1 className="text-[22px] font-sans ">Velviera</h1>
-      </div>
 
-      <div className="w-[100%] h-[100px] flex items-center justify-center flex-col gap-[10px]">
-        <span className="text-[25px] font-semibold">Login Page</span>
-        <span className="text-[16px]">Welcome to Velviera, Apply to Admin Login</span>
-      </div>
-      <div className="max-w-[600px] w-[90%] h-[400px] bg-[#00000025] border-[1px] border-[#96969635] backdrop:blur-2xl rounded-lg shadow-lg flex items-center justify-center ">
-        <form
-          action=""
-          onSubmit={AdminLogin}
-          className="w-[90%] h-[90%] flex flex-col items-center justify-start gap-[20px]">
-          <div className="w-[90%] h-[400px] flex flex-col items-center justify-center gap-[15px]  relative">
-            <input
-              type="text"
-              className="w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold"
-              placeholder="Email"
-              required
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-            />
-            <input
-              type={show ? "text" : "password"}
-              className="w-[100%] h-[50px] border-[2px] border-[#96969635] backdrop:blur-sm rounded-lg shadow-lg bg-transparent placeholder-[#ffffffc7] px-[20px] font-semibold"
-              placeholder="Password"
-              required
-              onChange={(e) => setPassword(e.target.value)}
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[var(--background-subtle)] px-4">
+      <Card className="w-full max-w-md p-8 md:p-12">
+        <div className="text-center mb-10">
+          <div className="inline-block px-3 py-1 mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-primary)] bg-[var(--brand-primary)]/10 rounded-full border border-[var(--brand-primary)]/20">
+            Admin Portal
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Velviera Control</h1>
+          <p className="text-sm text-[var(--text-muted)]">Please sign in to manage your store.</p>
+        </div>
+
+        <form onSubmit={handleAdminLogin} className="flex flex-col gap-6">
+          <Input 
+            label="Admin Email" 
+            type="email" 
+            placeholder="admin@velviera.com" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required 
+          />
+          
+          <div className="relative">
+            <Input 
+              label="Password" 
+              type={showPassword ? "text" : "password"} 
+              placeholder="••••••••" 
               value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required 
             />
-            {!show && (
-              <IoEyeOutline
-                className="w-[20px] h-[20px] cursor-pointer absolute right-[5%] bottom-[50%]"
-                onClick={() => setShow((prev) => !prev)}
-              />
-            )}
-            {show && (
-              <IoEye
-                className="w-[20px] h-[20px] cursor-pointer absolute right-[5%] bottom-[50%]"
-                onClick={() => setShow((prev) => !prev)}
-              />
-            )}
-            <button className="w-[100%] h-[50px] bg-[#6060f5] rounded-lg flex items-center justify-center mt-[20px] text-[17px] font-semibold">
-              Login
+            <button 
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-[38px] text-[var(--text-muted)] hover:text-[var(--text-base)]"
+            >
+              {showPassword ? <HiOutlineEyeSlash className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
             </button>
           </div>
+
+          <Button type="submit" size="lg" disabled={loading} className="w-full h-12">
+            {loading ? "Authenticating..." : "Sign In to Admin"}
+          </Button>
         </form>
-      </div>
+
+        <p className="mt-8 text-center text-xs text-[var(--text-muted)]">
+          Authorized personnel only. All access is logged and monitored.
+        </p>
+      </Card>
     </div>
   );
-}
+};
 
 export default Login;

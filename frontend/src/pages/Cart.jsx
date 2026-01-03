@@ -1,85 +1,121 @@
-import React, { useContext, useEffect, useState } from 'react'
-import Title from '../component/Title'
-import { shopDataContext } from '../context/ShopContext'
-import { useNavigate } from 'react-router-dom'
-import { RiDeleteBin6Line } from "react-icons/ri";
-import CartTotal from '../component/CartTotal';
+import React, { useContext, useEffect, useState } from 'react';
+import { shopDataContext } from '../context/ShopContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { HiOutlineTrash, HiOutlineArrowLeft } from "react-icons/hi2";
+import CartTotal from '../components/shared/CartTotal';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
 
-function Cart() {
-    const { products, currency, cartItem ,updateQuantity } = useContext(shopDataContext)
-  const [cartData, setCartData] = useState([])
-  const navigate = useNavigate()
-
+const Cart = () => {
+  const { products, currency, cartItem, updateQuantity } = useContext(shopDataContext);
+  const [cartData, setCartData] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const tempData = [];
-    for (const items in cartItem) {
-      for (const item in cartItem[items]) {
-        if (cartItem[items][item] > 0) {
+    for (const productId in cartItem) {
+      for (const size in cartItem[productId]) {
+        if (cartItem[productId][size] > 0) {
           tempData.push({
-            _id: items,
-            size: item,
-            quantity: cartItem[items][item],
+            _id: productId,
+            size: size,
+            quantity: cartItem[productId][size],
           });
         }
       }
     }
-    setCartData(tempData); 
-
+    setCartData(tempData);
   }, [cartItem]);
+
   return (
-    <div className='w-[99vw] min-h-[100vh] p-[20px] overflow-hidden bg-gradient-to-l from-[#141414] to-[#0c2025] '>
-      <div className='h-[8%] w-[100%] text-center mt-[80px]'>
-        <Title text1={'YOUR'} text2={'CART'} />
+    <div className="container mx-auto px-4 py-12 md:py-20">
+      <div className="flex items-center gap-4 mb-10">
+        <Link to="/collection" className="p-2 hover:bg-[var(--background-subtle)] rounded-full transition-colors">
+          <HiOutlineArrowLeft className="w-6 h-6" />
+        </Link>
+        <h1 className="text-3xl font-bold tracking-tight">Your Cart</h1>
       </div>
 
-      <div className='w-[100%] h-[92%] flex flex-col gap-[20px]'>
-        {
-         cartData.map((item,index)=>{
-             const productData = products.find((product) => product._id === item._id);
-            
-             return (
-              <div key={index} className='w-[100%] border-t border-b py-4'>
-                <div className='flex items-center justify-between gap-6 bg-[#51808048] py-[10px] px-[20px] rounded-2xl'>
-                    <div className='flex items-start gap-6'>
-                        <img className='w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] rounded-md object-cover' src={productData.image1} alt="" />
-                        <div className='flex flex-col gap-[10px]'>
-                            <p className='md:text-[25px] text-[18px] font-medium text-[#f3f9fc]'>{productData.name}</p>
-                            <div className='flex items-center gap-[15px]'>
-                                <p className='text-[18px] text-[#aaf4e7]'>{currency} {productData.price}</p>
-                                <p className='px-3 py-1 text-[16px] text-[white] bg-[#518080b4] rounded-md border-[1px] border-[#9ff9f9]'>{item.size}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div className='flex items-center gap-4 sm:gap-8'>
-                        <input type="number" min={1} defaultValue={item.quantity} className='w-16 sm:w-20 px-2 py-2 text-[white] text-[18px] font-semibold bg-[#518080b4] border-[1px] border-[#9ff9f9] rounded-md text-center'  onChange={(e)=> (e.target.value === ' ' || e.target.value === '0') ? null  :  updateQuantity(item._id,item.size,Number(e.target.value))} />
-                        <RiDeleteBin6Line  className='text-[#9ff9f9] w-[25px] h-[25px] cursor-pointer hover:text-red-400 transition-colors' onClick={()=>updateQuantity(item._id,item.size,0)}/>
-                    </div>
-                </div>
-              </div>
-             )
-         })
-        }
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* Cart Items */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          {cartData.length > 0 ? (
+            cartData.map((item, index) => {
+              const productData = products.find((product) => product._id === item._id);
+              if (!productData) return null;
 
-      <div className='flex justify-start items-end my-20'>
-        <div className='w-full sm:w-[450px]'>
-            <CartTotal/>
-            <button className='text-[18px] hover:bg-slate-500 cursor-pointer bg-[#51808048] py-[10px] px-[50px] rounded-2xl text-white flex items-center justify-center gap-[20px]  border-[1px] border-[#80808049] ml-[30px] mt-[20px]' onClick={()=>{
-                if (cartData.length > 0) {
-      navigate("/placeorder");
-    } else {
-      console.log("Your cart is empty!");
-    }
-            }}>
-                PROCEED TO CHECKOUT
-            </button>
+              return (
+                <Card key={`${item._id}-${item.size}`} padding={false} className="flex overflow-hidden">
+                  <div className="w-24 md:w-32 aspect-square bg-[var(--background-subtle)]">
+                    <img src={productData.image1} alt={productData.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 p-4 md:p-6 flex flex-col md:flex-row justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="font-bold text-lg md:text-xl leading-tight">
+                        <Link to={`/productdetail/${item._id}`} className="hover:underline">{productData.name}</Link>
+                      </h3>
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className="text-[var(--text-muted)]">Size:</span>
+                        <span className="font-medium px-2 py-0.5 bg-[var(--background-subtle)] rounded border border-[var(--border-base)]">{item.size}</span>
+                      </div>
+                      <p className="mt-2 font-medium text-[var(--brand-secondary)]">{currency}{productData.price}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between md:justify-end gap-6">
+                      <div className="flex items-center border border-[var(--border-base)] rounded-soft">
+                        <button 
+                          onClick={() => updateQuantity(item._id, item.size, Math.max(0, item.quantity - 1))}
+                          className="px-3 py-1 hover:bg-[var(--background-subtle)] transition-colors"
+                        >-</button>
+                        <span className="w-10 text-center text-sm font-bold">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateQuantity(item._id, item.size, item.quantity + 1)}
+                          className="px-3 py-1 hover:bg-[var(--background-subtle)] transition-colors"
+                        >+</button>
+                      </div>
+                      <button 
+                        onClick={() => updateQuantity(item._id, item.size, 0)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                      >
+                        <HiOutlineTrash className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })
+          ) : (
+            <div className="py-24 text-center border-2 border-dashed border-[var(--border-base)] rounded-soft">
+              <h3 className="text-xl font-medium mb-4">Your cart is empty</h3>
+              <Link to="/collection">
+                <Button variant="primary">Start Shopping</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-24">
+            <Card className="bg-[var(--background-subtle)]/50 border-[var(--border-base)]">
+              <CartTotal />
+              <Button 
+                size="lg" 
+                className="w-full mt-8 rounded-full" 
+                disabled={cartData.length === 0}
+                onClick={() => navigate('/placeorder')}
+              >
+                Proceed to Checkout
+              </Button>
+              <p className="text-[10px] text-center text-[var(--text-muted)] mt-4 uppercase tracking-widest font-bold">
+                Secure SSL Encrypted Checkout
+              </p>
+            </Card>
+          </div>
         </div>
       </div>
-      
     </div>
-  )
-}
+  );
+};
 
-export default Cart
+export default Cart;

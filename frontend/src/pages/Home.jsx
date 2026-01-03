@@ -1,49 +1,125 @@
-import React, { useEffect, useState } from 'react'
-import Backgound from '../component/Backgound'
-import Hero from '../component/Hero'
-import Product from './Product'
-import OurPolicy from '../component/OurPolicy'
-import NewLetterBox from '../component/NewLetterBox'
-import Footer from '../component/Footer'
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import Button from '../components/ui/Button';
+import { shopDataContext } from '../context/ShopContext';
+import Card from '../components/ui/Card';
 
+const Home = () => {
+  const { products } = useContext(shopDataContext);
+  const latestProducts = products?.slice(0, 4) || [];
 
-function Home() {
-  let heroData=[
-    {text1:"30% OFF Limited Offer",text2:"Style that"},
-    {text1:"Discover the Best of Bold Fashion",text2:"Limited Time Only!"},
-    {text1:"Explore Our Best Collection ",text2:"Shop Now!"},
-    {text1:"Choose your Perfect Fasion Fit",text2:"Now on Sale!"}
-  ]
-
-  let [heroCount,setHeroCount] = useState(0)
-
-  useEffect(()=>{
-    let interval = setInterval(()=>{
-      setHeroCount(prevCount => (prevCount === 3 ? 0 : prevCount + 1));
-    },3000);
-    return () => clearInterval(interval)
-  },[])
-  
   return (
-    <div className='overflow-x-hidden relative top-[70px]'>
-    <div className=' w-[100vw] lg:h-[100vh] md:h-[50vh] sm:h-[30vh]   bg-gradient-to-l from-[#141414] to-[#0c2025] '>
+    <div className="flex flex-col gap-24 pb-24">
+      {/* Hero Section */}
+      <section className="relative h-[80vh] flex items-center overflow-hidden bg-[var(--background-subtle)]">
+        <div className="container mx-auto px-4 z-10">
+          <div className="max-w-2xl">
+            <span className="inline-block px-3 py-1 mb-6 text-xs font-bold tracking-widest uppercase text-[var(--brand-secondary)] border border-[var(--border-base)] rounded-full">
+              New Collection 2026
+            </span>
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[0.9]">
+              ESSENTIALS <br />
+              <span className="text-[var(--brand-secondary)]">REDEFINED.</span>
+            </h1>
+            <p className="text-lg text-[var(--text-muted)] mb-10 max-w-lg leading-relaxed">
+              Discover our latest drop of premium essentials. Crafted with precision, designed for the modern individual who values quality and minimalism.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link to="/collection">
+                <Button size="lg" className="rounded-full px-8">Shop Collection</Button>
+              </Link>
+              <Link to="/about">
+                <Button variant="secondary" size="lg" className="rounded-full px-8">Our Story</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+        {/* Abstract shapes or placeholder for image */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-[var(--border-base)]/20 -skew-x-12 translate-x-1/4" />
+      </section>
 
-      <Backgound heroCount={heroCount}/>
-      <Hero
-      heroCount={heroCount}
-      setHeroCount={setHeroCount}
-      heroData={heroData[heroCount]}
-      />
+      {/* Featured Categories */}
+      <section className="container mx-auto px-4">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight mb-2">Featured Categories</h2>
+            <p className="text-[var(--text-muted)]">Curation of our most loved pieces.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {['Mens', 'Womens', 'Latest'].map((category) => (
+            <Link 
+              key={category}
+              to={`/collection?category=${category.toLowerCase()}`}
+              className="group relative h-96 overflow-hidden rounded-soft bg-[var(--background-subtle)] border border-[var(--border-base)]"
+            >
+              <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-all duration-500" />
+              <div className="absolute bottom-8 left-8">
+                <h3 className="text-2xl font-bold mb-2">{category}</h3>
+                <span className="text-sm font-medium underline underline-offset-4 decoration-2">Explore</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
+      {/* Latest Products */}
+      <section className="container mx-auto px-4">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight mb-2">Latest Arrivals</h2>
+            <p className="text-[var(--text-muted)]">Check out what just landed in our store.</p>
+          </div>
+          <Link to="/collection" className="text-sm font-bold underline underline-offset-4">View All</Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {latestProducts.length > 0 ? (
+            latestProducts.map((product) => (
+              <Link key={product._id} to={`/productdetail/${product._id}`} className="group">
+                <Card padding={false} className="aspect-[3/4] mb-4 overflow-hidden bg-[var(--background-subtle)] border-none shadow-none">
+                  <img 
+                    src={product.image1} 
+                    alt={product.name}
+                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-110"
+                  />
+                </Card>
+                <h3 className="text-sm font-medium mb-1 group-hover:underline underline-offset-2">{product.name}</h3>
+                <p className="text-sm text-[var(--text-muted)]">${product.price}</p>
+              </Link>
+            ))
+          ) : (
+            [1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-[3/4] bg-[var(--background-subtle)] rounded-soft mb-4" />
+                <div className="h-4 bg-[var(--background-subtle)] rounded-full w-2/3 mb-2" />
+                <div className="h-4 bg-[var(--background-subtle)] rounded-full w-1/3" />
+              </div>
+            ))
+          )}
+        </div>
+      </section>
 
-     
+      {/* Newsletter */}
+      <section className="container mx-auto px-4">
+        <Card className="bg-[var(--brand-primary)] text-[var(--background-base)] py-16 px-8 flex flex-col md:flex-row items-center justify-between gap-12 border-none">
+          <div className="max-w-md">
+            <h2 className="text-3xl font-bold tracking-tight mb-4 leading-tight">Join the Velviera Inner Circle</h2>
+            <p className="text-[var(--background-base)]/70">
+              Subscribe to receive updates, access to exclusive deals, and more.
+            </p>
+          </div>
+          <div className="flex w-full max-w-md gap-3">
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              className="flex-1 bg-[var(--background-base)]/10 border border-[var(--background-base)]/20 rounded-soft px-4 py-3 placeholder:text-[var(--background-base)]/40 focus:outline-none focus:ring-2 focus:ring-[var(--background-base)]/50"
+            />
+            <Button variant="secondary" className="px-8 bg-[var(--background-base)] text-[var(--brand-primary)]">Subscribe</Button>
+          </div>
+        </Card>
+      </section>
     </div>
-    <Product/>
-    <OurPolicy/>
-    <NewLetterBox/>
-    <Footer/>
-    </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

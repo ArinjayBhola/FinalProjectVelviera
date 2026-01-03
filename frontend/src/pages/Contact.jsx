@@ -2,44 +2,58 @@ import React from "react";
 import Title from "../component/Title";
 import contact from "../assets/contact.jpg";
 import NewLetterBox from "../component/NewLetterBox";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
 
 function Contact() {
   return (
-    <div className="w-[99vw] min-h-[100vh] flex items-center justify-center flex-col  bg-gradient-to-l from-[#141414] to-[#0c2025] gap-[50px] pt-[80px]">
-      <Title
-        text1={"CONTACT"}
-        text2={"US"}
-      />
-      <div className="w-[100%]  flex items-center justify-center flex-col lg:flex-row">
-        <div className="lg:w-[50%] w-[100%] flex items-center justify-center ">
-          <img
-            src={contact}
-            alt=""
-            className="lg:w-[70%] w-[80%] shadow-md shadow-black rounded-sm"
-          />
+    <div className="container mx-auto px-4 py-12 md:py-20 flex flex-col gap-16 md:gap-24">
+      {/* Hero Section */}
+      <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+        <div className="w-full lg:w-1/2">
+          <div className="relative aspect-[4/3] rounded-soft overflow-hidden border border-[var(--border-base)] shadow-lg">
+            <img
+              src={contact}
+              alt="Contact Velviera"
+              className="w-full h-full object-cover transition-all duration-700"
+            />
+          </div>
         </div>
-        <div className="lg:w-[50%] w-[80%] flex items-start justify-center gap-[20px]  flex-col mt-[20px] lg:mt-[0px]">
-          <p className="lg:w-[80%] w-[100%] text-[white] font-bold lg:text-[18px] text-[15px]">Our Store</p>
-          <p className="lg:w-[80%] w-[100%] text-[white] md:text-[16px] text-[13px]">
-            <p>12345 Random Statiom</p>
-            <p>random city , state , India</p>
-          </p>
-          <p className="lg:w-[80%] w-[100%] text-[white] md:text-[16px] text-[13px]">
-            <p>tel: +91-9876543210</p>
-            <p>Email: admin@velviera.com</p>
-          </p>
-          <p className="lg:w-[80%] w-[100%] text-[15px] text-[white] lg:text-[18px] mt-[10px] font-bold">
-            Careers at Velviera
-          </p>
-          <p className="lg:w-[80%] w-[100%] text-[white] md:text-[16px] text-[13px]">
-            Learn more about our teams and job openings
-          </p>
-          <button className="px-[30px] py-[20px] flex items-center justify-center text-[white] bg-transparent border active:bg-slate-600 rounded-md">
-            Explore Jobs
-          </button>
+        <div className="w-full lg:w-1/2 flex flex-col gap-8">
+          <Title text1="CONTACT" text2="US" />
+          
+          <div className="flex flex-col gap-10">
+            {/* Store Info */}
+            <div className="flex flex-col gap-4">
+              <h3 className="text-xl font-bold uppercase tracking-widest text-[var(--brand-primary)]">Our Store</h3>
+              <div className="flex flex-col gap-2 text-[var(--text-muted)]">
+                <p className="font-medium text-[var(--text-base)]">12345 Random Station</p>
+                <p>Random City, State, India</p>
+                <div className="mt-2 flex flex-col gap-1">
+                  <p><span className="font-medium text-[var(--text-base)]">Tel:</span> +91-9876543210</p>
+                  <p><span className="font-medium text-[var(--text-base)]">Email:</span> admin@velviera.com</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Careers */}
+            <div className="flex flex-col gap-4">
+              <h3 className="text-xl font-bold uppercase tracking-widest text-[var(--brand-primary)]">Careers at Velviera</h3>
+              <p className="text-[var(--text-muted)]">
+                We are always looking for talented individuals to join our growing team. 
+                Learn more about our culture and current job openings.
+              </p>
+              <Button variant="secondary" className="w-fit" size="lg">
+                Explore Jobs
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
-      <NewLetterBox />
+
+      <div className="max-w-4xl mx-auto w-full">
+        <NewLetterBox />
+      </div>
     </div>
   );
 }
