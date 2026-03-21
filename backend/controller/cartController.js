@@ -43,7 +43,12 @@ export const UpdateCart = async (req,res) => {
      try {
          const {itemId , size , quantity } = req.body
          const userData = await User.findById(req.userId)
-         let cartData = await userData.cartData;
+         
+         if (!userData) {
+           return res.status(404).json({ message: "User not found" });
+         }
+
+         let cartData = userData.cartData;
 
          cartData[itemId][size] = quantity
 
@@ -69,7 +74,12 @@ export const getUserCart = async (req,res) => {
      try {
          
          const userData = await User.findById(req.userId)
-         let cartData = await userData.cartData;
+         
+         if (!userData) {
+           return res.status(404).json({ message: "User not found" });
+         }
+
+         let cartData = userData.cartData;
 
 
     return res.status(200).json(cartData)

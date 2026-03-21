@@ -15,6 +15,11 @@ export const placeOrder = async (req,res) => {
      try {
          const {items , amount , address} = req.body;
          const userId = req.userId;
+         
+         const user = await User.findById(userId);
+         if (!user) {
+             return res.status(404).json({ message: "User not found" });
+         }
          const orderData = {
             items,
             amount,
@@ -44,6 +49,11 @@ export const placeOrderRazorpay = async (req,res) => {
         
          const {items , amount , address} = req.body;
          const userId = req.userId;
+         
+         const user = await User.findById(userId);
+         if (!user) {
+             return res.status(404).json({ message: "User not found" });
+         }
          const orderData = {
             items,
             amount,

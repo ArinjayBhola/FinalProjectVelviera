@@ -92,13 +92,12 @@ function Nav() {
             {userData?.name.slice(0, 1)}
           </div>
         )}
-        <MdOutlineShoppingCart
-          className="w-[30px] h-[30px] text-[#000000]  cursor-pointer hidden md:block"
-          onClick={() => navigate("/cart")}
-        />
-        <p className="absolute w-[18px] h-[18px] items-center  justify-center bg-black px-[5px] py-[2px] text-white  rounded-full text-[9px] top-[10px] right-[23px] hidden md:block">
-          {getCartCount()}
-        </p>
+        <div className="relative cursor-pointer" onClick={() => navigate("/cart")}>
+          <MdOutlineShoppingCart className="w-[30px] h-[30px] text-[#000000] hidden md:block" />
+          <p className="absolute w-[18px] h-[18px] flex items-center justify-center bg-black text-white rounded-full text-[9px] -top-1 -right-1 hidden md:flex">
+            {getCartCount()}
+          </p>
+        </div>
       </div>
       {showSearch && (
         <div className="w-[100%]  h-[80px] bg-[#d8f6f9dd] absolute top-[100%] left-0 right-0 flex items-center justify-center ">

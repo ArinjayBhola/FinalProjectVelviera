@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 
 const ProductDetail = () => {
   const { productId } = useParams();
-  const { products, currency, addtoCart, loading } = useContext(shopDataContext);
+  const { products, currency, addtoCart, updateQuantity, cartItem, loading } = useContext(shopDataContext);
   const [productData, setProductData] = useState(null);
   const [mainImage, setMainImage] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
@@ -131,9 +131,29 @@ const ProductDetail = () => {
           )}
 
           <div className="flex flex-col gap-4">
-            <Button size="lg" className="w-full md:w-64 py-4 rounded-full" onClick={handleAddToCart} disabled={loading}>
-              {loading ? 'Adding...' : 'Add to Cart'}
-            </Button>
+            {(cartItem[productId]?.[selectedSize] > 0 || (!isClothing && cartItem[productId]?.["Standard"] > 0)) ? (
+              <div className="flex items-center gap-6 w-full md:w-64 h-14 bg-[var(--background-subtle)] rounded-full border border-[var(--border-base)] px-6">
+                <button 
+                  onClick={() => updateQuantity(productId, isClothing ? selectedSize : "Standard", (cartItem[productId][isClothing ? selectedSize : "Standard"]) - 1)}
+                  className="text-2xl font-bold text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors w-8 h-8 flex items-center justify-center p-0 leading-none"
+                >
+                  −
+                </button>
+                <span className="flex-1 text-center text-lg font-bold">
+                  {cartItem[productId][isClothing ? selectedSize : "Standard"]}
+                </span>
+                <button 
+                  onClick={() => updateQuantity(productId, isClothing ? selectedSize : "Standard", (cartItem[productId][isClothing ? selectedSize : "Standard"]) + 1)}
+                  className="text-2xl font-bold text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors w-8 h-8 flex items-center justify-center p-0 leading-none"
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <Button size="lg" className="w-full md:w-64 py-4 rounded-full" onClick={handleAddToCart} disabled={loading}>
+                {loading ? 'Adding...' : 'Add to Cart'}
+              </Button>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-8 border-t border-[var(--border-base)]">
               <div className="flex items-center gap-3 text-sm text-[var(--text-muted)]">

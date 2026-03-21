@@ -47,7 +47,7 @@ const Add = () => {
         if (img) formData.append(`image${index + 1}`, img);
       });
 
-      const response = await axios.post(`${serverUrl}/api/product/add`, formData);
+      const response = await axios.post(`${serverUrl}/api/product/addproduct`, formData);
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Product added successfully");

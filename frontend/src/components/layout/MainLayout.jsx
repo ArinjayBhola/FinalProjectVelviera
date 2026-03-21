@@ -1,14 +1,19 @@
 import React from 'react';
 import Header from './Header';
+import { useLocation } from 'react-router-dom';
 
 const MainLayout = ({ children }) => {
+  const location = useLocation();
+  const isAuthPage = ['/login', '/signup'].includes(location.pathname);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      {!isAuthPage && <Header />}
       <main className="flex-1">
         {children}
       </main>
-      <footer className="py-12 border-t border-[var(--border-base)] bg-[var(--background-subtle)]">
+      {!isAuthPage && (
+        <footer className="py-12 border-t border-[var(--border-base)] bg-[var(--background-subtle)]">
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-xl font-bold mb-4 tracking-tight">VELVIERA</h3>
@@ -42,6 +47,7 @@ const MainLayout = ({ children }) => {
           </div>
         </div>
       </footer>
+      )}
     </div>
   );
 };

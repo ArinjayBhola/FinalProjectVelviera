@@ -60,7 +60,7 @@ let location = useLocation()
 
         <Route path='*' element={<NotFound/>}/>
       </Routes>
-      <Ai/>
+      {!['/login', '/signup'].includes(location.pathname) && <Ai/>}
     </MainLayout>
   )
 }

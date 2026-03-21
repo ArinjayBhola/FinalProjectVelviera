@@ -9,7 +9,7 @@ import { useTheme } from '../../context/ThemeContext';
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { userData, logout } = useContext(userDataContext);
-  const { cartCount } = useContext(shopDataContext);
+  const { getCartCount } = useContext(shopDataContext);
   const { theme, toggleTheme } = useTheme();
 
   const navLinks = [
@@ -60,9 +60,9 @@ const Header = () => {
           
           <Link to="/cart" className="p-2 text-[var(--text-base)] hover:bg-[var(--background-subtle)] rounded-full transition-all relative">
             <HiOutlineShoppingBag className="w-5 h-5" />
-            {cartCount > 0 && (
+            {getCartCount() > 0 && (
               <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--brand-primary)] text-[var(--background-base)] text-[10px] font-bold flex items-center justify-center rounded-full">
-                {cartCount}
+                {getCartCount()}
               </span>
             )}
           </Link>
