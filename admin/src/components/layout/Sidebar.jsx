@@ -11,6 +11,7 @@ const Sidebar = () => {
   const menuItems = [
     { name: 'Dashboard', path: '/', icon: HiOutlineHome },
     { name: 'Add Product', path: '/add', icon: HiOutlinePlusCircle },
+    { name: 'Add Category', path: '/add-category', icon: HiOutlinePlusCircle },
     { name: 'Product List', path: '/lists', icon: HiOutlineListBullet },
     { name: 'Orders', path: '/orders', icon: HiOutlineShoppingBag },
   ];

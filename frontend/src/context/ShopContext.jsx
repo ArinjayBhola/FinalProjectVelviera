@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { authDataContext } from './authContext'
 import axios from 'axios'
 import { userDataContext } from './UserContext'
-import { toast } from 'react-toastify'
+import { useModal } from './ModalContext'
 
  export const shopDataContext = createContext()
 function ShopContext({children}) {
@@ -12,6 +12,7 @@ function ShopContext({children}) {
     let {userData} = useContext(userDataContext)
     let [showSearch,setShowSearch] = useState(false)
     let {serverUrl} = useContext(authDataContext)
+    let { showAlert } = useModal()
     let [cartItem, setCartItem] = useState({});
       let [loading,setLoading] = useState(false)
     let currency = '₹';
@@ -56,7 +57,7 @@ function ShopContext({children}) {
       try {
       let result = await axios.post(serverUrl + "/api/cart/add" , {itemId,size} , {withCredentials: true})
       console.log(result.data)
-      toast.success("Product Added")
+      showAlert("Cart Updated", "Product added to your bag.", "success")
       setLoading(false)
 
 
@@ -65,7 +66,7 @@ function ShopContext({children}) {
       catch (error) {
         console.log(error)
         setLoading(false)
-        toast.error("Add Cart Error")
+        showAlert("Error", "Failed to add product to cart.", "error")
        
       }
      

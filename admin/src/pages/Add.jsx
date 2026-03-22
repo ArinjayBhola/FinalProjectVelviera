@@ -1,7 +1,6 @@
-import React, { useContext, useState } from 'react';
 import { authDataContext } from '../context/AuthContext';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { useModal } from '../context/ModalContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
@@ -17,7 +16,27 @@ const Add = () => {
   const [bestseller, setBestSeller] = useState(false);
   const [sizes, setSizes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
   const { serverUrl } = useContext(authDataContext);
+  const { showAlert } = useModal();
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${serverUrl}/api/category/list`);
+      if (response.data.success) {
+        setCategories(response.data.categories);
+        if (response.data.categories.length > 0) {
+          setCategory(response.data.categories[0].name);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleImageChange = (index, file) => {
     const newImages = [...images];
@@ -28,7 +47,7 @@ const Add = () => {
   const handleAddProduct = async (e) => {
     e.preventDefault();
     if (images.every(img => img === null)) {
-      toast.error("Please upload at least one image");
+      showAlert("Missing Images", "Please upload at least one image to proceed.", "warning");
       return;
     }
     
@@ -50,7 +69,7 @@ const Add = () => {
       const response = await axios.post(`${serverUrl}/api/product/addproduct`, formData);
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Product added successfully");
+        showAlert("Product Added", "High-five! Your new product is now live in the catalog.", "success");
         setName("");
         setDescription("");
         setImages([null, null, null, null]);
@@ -58,10 +77,10 @@ const Add = () => {
         setBestSeller(false);
         setSizes([]);
       } else {
-        toast.error(response.data.message);
+        showAlert("Error", response.data.message || "Failed to add product", "error");
       }
     } catch (error) {
-      toast.error("Failed to add product");
+      showAlert("Oops!", "Something went wrong while adding the product. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -107,9 +126,9 @@ const Add = () => {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                 >
-                  <option value="Men">Men</option>
-                  <option value="Women">Women</option>
-                  <option value="Kids">Kids</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat.name}>{cat.name}</option>
+                  ))}
                 </select>
               </div>
               <div className="flex flex-col gap-1.5">

@@ -1,41 +1,46 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { authDataContext } from '../context/AuthContext';
 import axios from 'axios';
+import {useState, useContext, useEffect} from "react";
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { HiOutlineTrash, HiOutlineCube } from "react-icons/hi2";
-import { toast } from 'react-toastify';
+import { useModal } from '../context/ModalContext';
+import { authDataContext } from '../context/AuthContext';
 
 const Lists = () => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const { serverUrl } = useContext(authDataContext);
+  const { showAlert, showConfirm } = useModal();
 
   const fetchList = async () => {
     try {
       const response = await axios.get(`${serverUrl}/api/product/list`);
       setList(response.data || []);
     } catch (error) {
-      toast.error("Failed to fetch product list");
+      showAlert("Error", "We couldn't retrieve your product catalog. Please check your connection.", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const removeList = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-    
-    try {
-      const response = await axios.post(`${serverUrl}/api/product/remove/${id}`, {}, { withCredentials: true });
-      if (response.status === 200 || response.status === 201) {
-        toast.success("Product removed successfully");
-        fetchList();
-      } else {
-        toast.error(response.data.message);
+    showConfirm(
+      "Confirm Deletion",
+      "Are you sure you want to remove this product from your catalog? This action cannot be undone.",
+      async () => {
+        try {
+          const response = await axios.post(`${serverUrl}/api/product/remove/${id}`, {}, { withCredentials: true });
+          if (response.status === 200 || response.status === 201) {
+            showAlert("Removed", "The product has been successfully removed from your store.", "success");
+            fetchList();
+          } else {
+            showAlert("Error", response.data.message || "Could not remove product", "error");
+          }
+        } catch (error) {
+          showAlert("Error", "Something went wrong while trying to delete the product.", "error");
+        }
       }
-    } catch (error) {
-      toast.error("Failed to remove product");
-    }
+    );
   };
 
   useEffect(() => {

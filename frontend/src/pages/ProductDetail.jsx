@@ -4,7 +4,7 @@ import { shopDataContext } from "../context/ShopContext";
 import { HiStar, HiOutlineCheckCircle } from "react-icons/hi2";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
-import { toast } from 'react-toastify';
+import { useModal } from "../context/ModalContext";
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -12,6 +12,7 @@ const ProductDetail = () => {
   const [productData, setProductData] = useState(null);
   const [mainImage, setMainImage] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
+  const { showAlert } = useModal();
 
   const fetchProductData = () => {
     const product = products.find(item => item._id === productId);
@@ -49,13 +50,14 @@ const ProductDetail = () => {
     
     if (isClothing) {
       if (!selectedSize) {
-        toast.error("Please select a size");
+        showAlert("Size Required", "Please select a size before adding the item to your cart.", "info");
         return;
       }
       addtoCart(productData._id, selectedSize);
     } else {
       addtoCart(productData._id, "Standard");
     }
+    showAlert("Added to Cart", "The item has been added to your bag. Continue shopping or checkout now!", "success");
   };
 
   if (!productData) return <div className="min-h-screen bg-[var(--background-base)]" />;

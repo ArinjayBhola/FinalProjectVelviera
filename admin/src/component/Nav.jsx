@@ -4,23 +4,24 @@ import logo from "../assets/logo.png";
 import axios from "axios";
 import { authDataContext } from "../context/AuthContext";
 import { adminDataContext } from "../context/AdminContext";
-import { toast } from "react-toastify";
+import { useModal } from "../context/ModalContext";
 
 function Nav() {
   let navigate = useNavigate();
   let { serverUrl } = useContext(authDataContext);
   let { getAdmin } = useContext(adminDataContext);
+  const { showAlert } = useModal();
 
   const logOut = async () => {
     try {
       const result = await axios.get(serverUrl + "/api/auth/logout", { withCredentials: true });
       console.log(result.data);
-      toast.success("LogOut Successfully");
+      showAlert("Logged Out", "You have been successfully logged out of the admin panel.", "success");
       getAdmin();
       navigate("/login");
     } catch (error) {
       console.log(error);
-      toast.error("LogOut Failed");
+      showAlert("Error", "Logout failed. Please try again.", "error");
     }
   };
   return (

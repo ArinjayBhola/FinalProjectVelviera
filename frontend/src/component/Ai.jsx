@@ -2,12 +2,13 @@ import React, { useContext, useState } from 'react'
 import ai from "../assets/ai.png"
 import { shopDataContext } from '../context/ShopContext'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
+import { useModal } from '../context/ModalContext'
 import open from "../assets/open.mp3"
 function Ai() {
   let {showSearch , setShowSearch} = useContext(shopDataContext)
   let navigate = useNavigate()
   let [activeAi,setActiveAi] = useState(false)
+  const { showAlert } = useModal()
   let openingSound = new Audio(open)
 
  function speak(message){
@@ -65,7 +66,7 @@ window.speechSynthesis.speak(utterence)
       setShowSearch(false) 
     }
     else{
-      toast.error("Try Again")
+      showAlert("Vera Voice", "I didn't quite catch that. Could you try again?", "info")
     }
 
   }

@@ -4,7 +4,7 @@ import axios from "axios";
 import { authDataContext } from "../context/AuthContext";
 import { adminDataContext } from "../context/AdminContext";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useModal } from '../context/ModalContext';
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Card from "../components/ui/Card";
@@ -14,9 +14,10 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { serverUrl } = useContext(authDataContext);
-  const { getAdmin } = useContext(adminDataContext);
+  const { getAdmin, setAdminData, setToken } = useContext(adminDataContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { showAlert } = useModal();
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -28,14 +29,15 @@ const Login = () => {
         { withCredentials: true }
       );
       if (response.status === 200 || response.status === 201) {
-        toast.success("Admin access granted");
+        setToken(response.data.token);
+        showAlert("Welcome Back!", "Successfully logged in to the admin dashboard.", "success");
         getAdmin();
         navigate("/");
       } else {
-        toast.error(response.data.message);
+        showAlert("Login Failed", response.data.message || "Invalid credentials. Please try again.", "error");
       }
     } catch (error) {
-      toast.error("Invalid admin credentials");
+      showAlert("Authentication Error", "Something went wrong. Please check your network or try again later.", "error");
     } finally {
       setLoading(false);
     }

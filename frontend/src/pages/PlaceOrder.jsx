@@ -6,7 +6,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { useModal } from '../context/ModalContext';
 import { userDataContext } from '../context/UserContext';
 
 const PlaceOrder = () => {
@@ -15,6 +15,7 @@ const PlaceOrder = () => {
   const navigate = useNavigate();
   const [method, setMethod] = useState('cod');
   const [loading, setLoading] = useState(false);
+  const { showAlert } = useModal();
 
   const [formData, setFormData] = useState({
     firstName: userData?.userName || '',
@@ -65,9 +66,9 @@ const PlaceOrder = () => {
           if (response.status === 200 || response.status === 201) {
             setCartItem({});
             navigate('/order');
-            toast.success("Order placed successfully!");
+            showAlert("Success!", "Your order has been placed successfully. Thank you for shopping with Velviera!", "success");
           } else {
-            toast.error(response.data.message);
+            showAlert("Order Failed", response.data.message || "We couldn't process your order. Please try again.", "error");
           }
           break;
 
@@ -83,7 +84,7 @@ const PlaceOrder = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      showAlert("Error", error.message || "An unexpected error occurred while placing your order.", "error");
     } finally {
       setLoading(false);
     }
@@ -104,11 +105,11 @@ const PlaceOrder = () => {
           if (status === 200 || status === 201) {
             navigate('/order');
             setCartItem({});
-            toast.success("Payment successful!");
+            showAlert("Payment Successful", "Your transaction was processed successfully. Your order is now being prepared.", "success");
           }
         } catch (error) {
           console.log(error);
-          toast.error(error.message);
+          showAlert("Payment Error", "Something went wrong during the payment process. Please contact support.", "error");
         }
       }
     };

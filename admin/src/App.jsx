@@ -5,21 +5,21 @@ import Add from './pages/Add'
 import Lists from './pages/Lists'
 import Orders from './pages/Orders'
 import Login from './pages/Login'
+import AddCategory from './pages/AddCategory'
 import SidebarLayout from './components/layout/SidebarLayout'
 import { adminDataContext } from './context/AdminContext'
-  import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
   let {adminData} = useContext(adminDataContext)
   return (
 
     <>
-      <ToastContainer />
     {!adminData ? <Login/> : (
       <SidebarLayout>
         <Routes>
           <Route path='/' element={<Home/>}/>
           <Route path='/add' element={<Add/>}/>
+          <Route path='/add-category' element={<AddCategory/>}/>
           <Route path='/lists' element={<Lists/>}/>
           <Route path='/orders' element={<Orders/>}/>
           <Route path='/login' element={<Login/>}/>

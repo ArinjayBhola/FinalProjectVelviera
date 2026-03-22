@@ -1,14 +1,16 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { authDataContext } from '../context/AuthContext';
 import axios from 'axios';
+import { authDataContext } from '../context/AuthContext';
+import { useModal } from '../context/ModalContext';
 import Card from '../components/ui/Card';
 import { HiOutlineShoppingBag, HiOutlineMapPin, HiOutlinePhone, HiOutlineCalendarDays } from "react-icons/hi2";
-import { toast } from 'react-toastify';
+
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { serverUrl } = useContext(authDataContext);
+  const { showAlert } = useModal();
 
   const fetchAllOrders = async () => {
     try {
@@ -17,7 +19,7 @@ const Orders = () => {
         setOrders(response.data.reverse());
       }
     } catch (error) {
-      toast.error("Failed to fetch orders");
+      showAlert("Error", "Failed to fetch orders. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -27,11 +29,17 @@ const Orders = () => {
     try {
       const response = await axios.post(`${serverUrl}/api/order/status`, { orderId, status: e.target.value }, { withCredentials: true });
       if (response.status === 200 || response.status === 201) {
-        toast.success("Order status updated");
-        await fetchAllOrders();
+        if (response.data.success) {
+          showAlert("Order Updated", "The order status has been successfully updated.", "success");
+          await fetchAllOrders();
+        } else {
+          showAlert("Error", response.data.message || "Failed to update order status", "error");
+        }
+      } else {
+        showAlert("Error", response.data.message || "Failed to update order status due to server error.", "error");
       }
     } catch (error) {
-      toast.error("Failed to update status");
+      showAlert("Error", "Something went wrong while updating the order status.", "error");
     }
   };
 
