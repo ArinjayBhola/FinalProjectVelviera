@@ -160,12 +160,20 @@ const Header = () => {
           </Link>
 
           {userData ? (
-            <button 
-              onClick={logout}
-              className="hidden md:block text-sm font-medium text-[var(--text-muted)] hover:text-[var(--brand-primary)]"
-            >
-              Logout
-            </button>
+            <div className="hidden md:flex items-center gap-4 border-l border-[var(--border-base)] pl-4 ml-2">
+              <Link 
+                to="/order"
+                className="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors"
+              >
+                Orders
+              </Link>
+              <button 
+                onClick={logout}
+                className="text-sm font-medium text-[var(--text-muted)] hover:text-red-500 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
             <Link 
               to="/login"
@@ -200,12 +208,21 @@ const Header = () => {
           ))}
           <div className="pt-4 border-t border-[var(--border-base)]">
              {userData ? (
-              <button 
-                onClick={() => { logout(); setIsMobileMenuOpen(false); }}
-                className="w-full text-left font-medium text-red-500"
-              >
-                Logout
-              </button>
+              <div className="flex flex-col gap-4">
+                <Link 
+                  to="/order"
+                  className="w-full text-left font-medium text-[var(--text-base)]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  My Orders
+                </Link>
+                <button 
+                  onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                  className="w-full text-left font-medium text-red-500"
+                >
+                  Logout
+                </button>
+              </div>
             ) : (
               <Link 
                 to="/login"
