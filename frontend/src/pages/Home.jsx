@@ -47,16 +47,21 @@ const Home = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {['Mens', 'Womens', 'Latest'].map((category) => (
+          {[
+            { name: 'Mens', img: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&q=80&w=800' },
+            { name: 'Womens', img: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800' },
+            { name: 'Latest', img: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800' }
+          ].map((category) => (
             <Link 
-              key={category}
-              to={`/collection?category=${category.toLowerCase()}`}
-              className="group relative h-96 overflow-hidden rounded-soft bg-[var(--background-subtle)] border border-[var(--border-base)]"
+              key={category.name}
+              to={`/collection?category=${category.name.toLowerCase()}`}
+              className="group relative h-96 overflow-hidden rounded-soft bg-[var(--background-subtle)] border border-[var(--border-base)] transition-all duration-500 hover:ring-4 hover:ring-[var(--brand-secondary)] hover:ring-offset-4 hover:ring-offset-[var(--background-base)] hover:border-transparent"
             >
-              <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-all duration-500" />
-              <div className="absolute bottom-8 left-8">
-                <h3 className="text-2xl font-bold mb-2">{category}</h3>
-                <span className="text-sm font-medium underline underline-offset-4 decoration-2">Explore</span>
+              <img src={category.img} alt={category.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-500 group-hover:opacity-80" />
+              <div className="absolute bottom-8 left-8 text-white z-10 transition-transform duration-500 group-hover:-translate-y-2">
+                <h3 className="text-3xl font-bold mb-2 tracking-tight text-white">{category.name}</h3>
+                <span className="text-sm font-bold uppercase tracking-widest text-[#fdfbf7] border-b-2 border-transparent group-hover:border-[#8b7355] transition-colors duration-300">Explore Collection</span>
               </div>
             </Link>
           ))}
@@ -80,11 +85,11 @@ const Home = () => {
                   <img 
                     src={product.image1} 
                     alt={product.name}
-                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-all duration-700"
                   />
                 </Card>
                 <h3 className="text-sm font-medium mb-1 group-hover:underline underline-offset-2">{product.name}</h3>
-                <p className="text-sm text-[var(--text-muted)]">${product.price}</p>
+                <p className="text-sm text-[var(--text-muted)]">₹{product.price}</p>
               </Link>
             ))
           ) : (

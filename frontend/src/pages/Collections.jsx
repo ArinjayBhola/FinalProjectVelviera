@@ -3,10 +3,11 @@ import { HiOutlineAdjustmentsHorizontal, HiOutlineChevronRight, HiOutlineChevron
 import { shopDataContext } from '../context/ShopContext';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Collections = () => {
   const { products, search, showSearch } = useContext(shopDataContext);
+  const location = useLocation();
   const [showFilter, setShowFilter] = useState(false);
   const [filterProduct, setFilterProduct] = useState([]);
   const [category, setCategory] = useState([]);
@@ -46,6 +47,9 @@ const Collections = () => {
       case 'high-low':
         productCopy.sort((a, b) => b.price - a.price);
         break;
+      case 'latest':
+        productCopy.sort((a, b) => b.date - a.date);
+        break;
       default:
         // Keep as relevant/default
         break;
@@ -58,6 +62,20 @@ const Collections = () => {
     applyFilter();
     setCurrentPage(1);
   }, [category, subCategory, search, showSearch, sortType, products]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const catParam = params.get('category');
+    if (catParam) {
+      if (catParam === 'mens') setCategory(['Men']);
+      else if (catParam === 'womens') setCategory(['Women']);
+      else if (catParam === 'kids') setCategory(['Kids']);
+      else if (catParam === 'latest') {
+        setSortType('latest');
+        setCategory([]);
+      }
+    }
+  }, [location.search]);
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -142,6 +160,7 @@ const Collections = () => {
             className="bg-[var(--background-base)] border border-[var(--border-base)] rounded-soft text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
           >
             <option value="relevant">Sort by: Relevant</option>
+            <option value="latest">Sort by: Latest</option>
             <option value="low-high">Price: Low to High</option>
             <option value="high-low">Price: High to Low</option>
           </select>
@@ -155,11 +174,11 @@ const Collections = () => {
                 <img 
                   src={item.image1} 
                   alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-700"
                 />
               </div>
               <h3 className="text-sm font-medium mb-1 group-hover:underline underline-offset-2">{item.name}</h3>
-              <p className="text-sm text-[var(--text-muted)]">${item.price}</p>
+              <p className="text-sm text-[var(--text-muted)]">₹{item.price}</p>
             </Link>
           ))}
         </div>
