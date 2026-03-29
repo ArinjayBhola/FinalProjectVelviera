@@ -97,11 +97,25 @@ function ShopContext({children}) {
         await axios.post(serverUrl + "/api/cart/update", { itemId, size, quantity }, { withCredentials: true })
       } catch (error) {
         console.log(error)
-        
       }
     }
-      
-    }
+  }
+
+  const clearCartHandler = async () => {
+      setCartItem({});
+      if (userData) {
+        try {
+          await axios.post(serverUrl + "/api/cart/clear", {}, { withCredentials: true });
+          showAlert("Cart Cleared", "Your cart has been emptied.", "success");
+        } catch (error) {
+          console.log(error);
+          showAlert("Error", "Could not clear cart entirely on server.", "error");
+        }
+      } else {
+        showAlert("Cart Cleared", "Your cart has been emptied.", "success");
+      }
+    };
+
      const getCartCount = () => {
     let totalCount = 0;
     for (const items in cartItem) {
@@ -150,7 +164,7 @@ function ShopContext({children}) {
 
 
     let value = {
-      products, currency , delivery_fee,getProducts,search,setSearch,showSearch,setShowSearch,cartItem, addtoCart, getCartCount, setCartItem ,updateQuantity,getCartAmount,loading
+      products, currency , delivery_fee,getProducts,search,setSearch,showSearch,setShowSearch,cartItem, addtoCart, getCartCount, setCartItem ,updateQuantity,getCartAmount,loading,clearCartHandler
     }
   return (
     <div>

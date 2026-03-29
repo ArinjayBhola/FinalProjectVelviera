@@ -21,6 +21,23 @@ function UserContext({children}) {
         }
     }
 
+    const toggleWishlist = async (productId) => {
+        try {
+            let result = await axios.post(serverUrl + "/api/user/wishlist/toggle", { productId }, { withCredentials: true });
+            if (result.status === 200) {
+                // Update local context
+                setUserData(prev => ({
+                    ...prev,
+                    wishlist: result.data // The backend returns the updated wishlist array
+                }));
+                return result.data;
+            }
+        } catch (error) {
+            console.log("Error toggling wishlist", error);
+            throw error;
+        }
+    }
+
     useEffect(()=>{
      getCurrentUser()
     },[])
@@ -28,7 +45,7 @@ function UserContext({children}) {
 
 
     let value = {
-     userData,setUserData,getCurrentUser
+     userData,setUserData,getCurrentUser, toggleWishlist
     }
     
    

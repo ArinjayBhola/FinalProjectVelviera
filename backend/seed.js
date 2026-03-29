@@ -385,7 +385,19 @@ const seedDatabase = async () => {
             price: p.price + 15,
             date: Date.now() + 1000
         }));
-        const allProducts = [...productsData, ...moreProducts];
+        const ultraProducts = productsData.map(p => ({
+            ...p,
+            name: "Ultra " + p.name,
+            price: p.price + 25,
+            date: Date.now() + 2000
+        }));
+        const classicProducts = productsData.map(p => ({
+            ...p,
+            name: "Classic " + p.name,
+            price: p.price - 5,
+            date: Date.now() - 1000
+        }));
+        const allProducts = [...productsData, ...moreProducts, ...ultraProducts, ...classicProducts];
 
         // Insert products
         await Product.insertMany(allProducts);

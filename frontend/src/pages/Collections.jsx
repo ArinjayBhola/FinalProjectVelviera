@@ -14,6 +14,19 @@ const Collections = () => {
   const [subCategory, setSubCategory] = useState([]);
   const [sortType, setSortType] = useState("relevant");
   
+  // Advanced filters
+  const [priceRange, setPriceRange] = useState(300);
+  const [selectedColors, setSelectedColors] = useState([]);
+
+  const colors = [
+    { name: 'Black', hex: '#222222' },
+    { name: 'White', hex: '#ffffff' },
+    { name: 'Blue', hex: '#1e3a8a' },
+    { name: 'Yellow', hex: '#facc15' },
+    { name: 'Brown', hex: '#8B4513' },
+    { name: 'Grey', hex: '#9ca3af' }
+  ];
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -24,6 +37,10 @@ const Collections = () => {
 
   const toggleSubCategory = (value) => {
     setSubCategory(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
+  };
+
+  const toggleColor = (value) => {
+    setSelectedColors(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
   };
 
   const applyFilter = () => {
@@ -38,6 +55,18 @@ const Collections = () => {
     if (subCategory.length > 0) {
       productCopy = productCopy.filter(item => subCategory.includes(item.subCategory));
     }
+
+    if (selectedColors.length > 0) {
+      productCopy = productCopy.filter(item => {
+         const nameLower = item.name.toLowerCase();
+         const descLower = item.description.toLowerCase();
+         return selectedColors.some(color => 
+            nameLower.includes(color.toLowerCase()) || descLower.includes(color.toLowerCase())
+         );
+      });
+    }
+
+    productCopy = productCopy.filter(item => item.price <= priceRange);
 
     // Apply Sorting
     switch (sortType) {
@@ -61,7 +90,7 @@ const Collections = () => {
   useEffect(() => {
     applyFilter();
     setCurrentPage(1);
-  }, [category, subCategory, search, showSearch, sortType, products]);
+  }, [category, subCategory, search, showSearch, sortType, products, priceRange, selectedColors]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -142,6 +171,44 @@ const Collections = () => {
                 ))}
               </div>
             </div>
+
+            {/* Price Range Filter */}
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Max Price</h3>
+                <span className="text-sm font-bold text-[var(--brand-primary)]">₹{priceRange}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="300" 
+                value={priceRange} 
+                onChange={(e) => setPriceRange(e.target.value)}
+                className="w-full h-1 bg-[var(--border-base)] rounded-lg appearance-none cursor-pointer accent-[var(--brand-primary)]"
+              />
+            </div>
+
+            {/* Colors Filter */}
+            <div className="flex flex-col gap-4">
+              <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Colors</h3>
+              <div className="flex flex-wrap gap-3">
+                {colors.map((color) => (
+                  <button
+                    key={color.name}
+                    onClick={() => toggleColor(color.name)}
+                    className={`w-8 h-8 rounded-full border-2 transition-all cursor-pointer shadow-sm relative ${selectedColors.includes(color.name) ? 'scale-110 shadow-md ring-2 ring-offset-2 ring-[var(--brand-primary)] ring-offset-[var(--background-base)]' : 'border-transparent hover:scale-110'}`}
+                    style={{ backgroundColor: color.hex, borderColor: color.name === 'White' && !selectedColors.includes('White') ? 'var(--border-base)' : 'transparent' }}
+                    title={color.name}
+                  >
+                     {selectedColors.includes(color.name) && (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                           <div className={`w-2 h-2 rounded-full ${color.name === 'White' ? 'bg-[#222]' : 'bg-white'}`} />
+                        </span>
+                     )}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </aside>
@@ -187,8 +254,8 @@ const Collections = () => {
         {filterProduct.length === 0 && (
           <div className="py-24 text-center">
             <h3 className="text-lg font-medium mb-2">No products found</h3>
-            <p className="text-[var(--text-muted)] mb-8">Try adjusting your filters or search query.</p>
-            <Button variant="secondary" onClick={() => { setCategory([]); setSubCategory([]); }}>Clear All Filters</Button>
+            <p className="text-[var(--text-muted)] mb-8">Try adjusting your advanced filters or search query.</p>
+            <Button variant="secondary" onClick={() => { setCategory([]); setSubCategory([]); setSelectedColors([]); setPriceRange(300); }}>Clear All Filters</Button>
           </div>
         )}
 

@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 
 const Order = () => {
   const [orderData, setOrderData] = useState([]);
+  const [activeTab, setActiveTab] = useState('active'); // 'active' or 'completed'
   const { currency, backendUrl, token } = useContext(shopDataContext);
 
   const loadOrderData = async () => {
@@ -36,17 +37,38 @@ const Order = () => {
     }
   }, [token]);
 
+  const activeOrders = orderData.filter(item => item.status !== 'Delivered' && item.status !== 'Cancelled');
+  const completedOrders = orderData.filter(item => item.status === 'Delivered' || item.status === 'Cancelled');
+
+  const displayedOrders = activeTab === 'active' ? activeOrders : completedOrders;
+
   return (
-    <div className="container mx-auto px-4 py-12 md:py-20">
-      <div className="mb-10">
+    <div className="container mx-auto px-4 py-12 md:py-20 min-h-[70vh]">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">My Orders</h1>
         <p className="text-sm text-[var(--text-muted)]">Track and manage your recent purchases</p>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {orderData.length > 0 ? (
-          orderData.map((item, index) => (
-            <Card key={index} padding={false} className="flex flex-col md:flex-row items-center overflow-hidden">
+      {/* Tabs */}
+      <div className="flex border-b border-[var(--border-base)] mb-8 overflow-x-auto no-scrollbar">
+        <button 
+          onClick={() => setActiveTab('active')} 
+          className={`flex-1 md:flex-none px-8 py-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'active' ? 'border-[var(--brand-primary)] text-[var(--text-base)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-base)]'}`}
+        >
+          Active Orders ({activeOrders.length})
+        </button>
+        <button 
+          onClick={() => setActiveTab('completed')} 
+          className={`flex-1 md:flex-none px-8 py-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'completed' ? 'border-[var(--brand-primary)] text-[var(--text-base)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-base)]'}`}
+        >
+          Completed / Done ({completedOrders.length})
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        {displayedOrders.length > 0 ? (
+          displayedOrders.map((item, index) => (
+            <Card key={index} padding={false} className="flex flex-col md:flex-row items-center overflow-hidden transition-all hover:shadow-md hover:border-[var(--brand-secondary)]/30">
               <div className="w-full md:w-32 aspect-square bg-[var(--background-subtle)]">
                 <img src={item.image1} alt={item.name} className="w-full h-full object-cover" />
               </div>
@@ -77,9 +99,19 @@ const Order = () => {
             </Card>
           ))
         ) : (
-          <div className="py-24 text-center border-2 border-dashed border-[var(--border-base)] rounded-soft">
-            <h3 className="text-xl font-medium mb-2">No orders yet</h3>
-            <p className="text-[var(--text-muted)]">When you buy something, it will appear here.</p>
+          <div className="py-24 flex flex-col items-center justify-center text-center bg-[var(--background-subtle)] border border-[var(--border-base)] rounded-soft">
+            <span className="text-5xl mb-4">{activeTab === 'active' ? '📦' : '🧾'}</span>
+            <h3 className="text-xl font-bold text-[var(--text-base)] mb-2">
+              {activeTab === 'active' ? "You don't have any active orders" : "No completed orders yet"}
+            </h3>
+            <p className="text-[var(--text-muted)] max-w-sm mb-6">
+              {activeTab === 'active' 
+                ? "When you place a new order, it will appear here so you can track its progress."
+                : "Orders that have been fully delivered or completed will be archived here."}
+            </p>
+            {activeTab === 'active' && (
+              <Button onClick={() => window.location.href='/collection'}>Shop Now</Button>
+            )}
           </div>
         )}
       </div>

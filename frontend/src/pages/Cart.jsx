@@ -1,15 +1,26 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { shopDataContext } from '../context/ShopContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { HiOutlineTrash, HiOutlineArrowLeft } from "react-icons/hi2";
+import { HiOutlineTrash, HiOutlineArrowLeft, HiOutlineXMark } from "react-icons/hi2";
 import CartTotal from '../components/shared/CartTotal';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import { useModal } from '../context/ModalContext';
 
 const Cart = () => {
-  const { products, currency, cartItem, updateQuantity } = useContext(shopDataContext);
+  const { products, currency, cartItem, updateQuantity, clearCartHandler } = useContext(shopDataContext);
   const [cartData, setCartData] = useState([]);
   const navigate = useNavigate();
+  const { showConfirm } = useModal();
+
+  const handleClearCart = () => {
+    if (cartData.length === 0) return;
+    showConfirm(
+      "Clear Cart",
+      "Are you sure you want to remove all items from your bag?",
+      () => clearCartHandler()
+    );
+  };
 
   useEffect(() => {
     const tempData = [];
@@ -27,20 +38,34 @@ const Cart = () => {
     setCartData(tempData);
   }, [cartItem]);
 
+  const validCartData = cartData.filter(item => products.some(product => product._id === item._id));
+
   return (
-    <div className="container mx-auto px-4 py-12 md:py-20">
-      <div className="flex items-center gap-4 mb-10">
-        <Link to="/collection" className="p-2 hover:bg-[var(--background-subtle)] rounded-full transition-colors">
-          <HiOutlineArrowLeft className="w-6 h-6" />
-        </Link>
-        <h1 className="text-3xl font-bold tracking-tight">Your Cart</h1>
+    <div className="container mx-auto px-4 py-12 md:py-20 min-h-[70vh]">
+      <div className="flex justify-between items-center mb-10">
+        <div className="flex items-center gap-4">
+          <Link to="/collection" className="p-2 hover:bg-[var(--background-subtle)] rounded-full transition-colors">
+            <HiOutlineArrowLeft className="w-6 h-6" />
+          </Link>
+          <h1 className="text-3xl font-bold tracking-tight">Your Cart</h1>
+        </div>
+        
+        {cartData.length > 0 && (
+          <button 
+            onClick={handleClearCart}
+            className="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-600 transition-colors px-4 py-2 hover:bg-red-50 rounded-full"
+          >
+            <HiOutlineXMark className="w-4 h-4" />
+            Clear Bag
+          </button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Cart Items */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          {cartData.length > 0 ? (
-            cartData.map((item, index) => {
+      {validCartData.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Cart Items */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            {validCartData.map((item, index) => {
               const productData = products.find((product) => product._id === item._id);
               if (!productData) return null;
 
@@ -83,37 +108,48 @@ const Cart = () => {
                   </div>
                 </Card>
               );
-            })
-          ) : (
-            <div className="py-24 text-center border-2 border-dashed border-[var(--border-base)] rounded-soft">
-              <h3 className="text-xl font-medium mb-4">Your cart is empty</h3>
-              <Link to="/collection">
-                <Button variant="primary">Start Shopping</Button>
-              </Link>
-            </div>
-          )}
-        </div>
+            })}
+          </div>
 
-        {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-24">
-            <Card className="bg-[var(--background-subtle)]/50 border-[var(--border-base)]">
-              <CartTotal />
-              <Button 
-                size="lg" 
-                className="w-full mt-8 rounded-full" 
-                disabled={cartData.length === 0}
-                onClick={() => navigate('/placeorder')}
-              >
-                Proceed to Checkout
-              </Button>
-              <p className="text-[10px] text-center text-[var(--text-muted)] mt-4 uppercase tracking-widest font-bold">
-                Secure SSL Encrypted Checkout
-              </p>
-            </Card>
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <Card className="bg-[var(--background-subtle)]/50 border-[var(--border-base)]">
+                <CartTotal />
+                <Button 
+                  size="lg" 
+                  className="w-full mt-8 rounded-full" 
+                  disabled={validCartData.length === 0}
+                  onClick={() => navigate('/placeorder')}
+                >
+                  Proceed to Checkout
+                </Button>
+                <p className="text-[10px] text-center text-[var(--text-muted)] mt-4 uppercase tracking-widest font-bold">
+                  Secure SSL Encrypted Checkout
+                </p>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="py-24 flex flex-col items-center justify-center text-center bg-[var(--background-subtle)] border border-[var(--border-base)] rounded-soft">
+          <span className="text-6xl mb-6 drop-shadow-sm">🛍️</span>
+          <h3 className="text-2xl font-bold text-[var(--brand-primary)] mb-3">Your cart is empty</h3>
+          <p className="text-[var(--text-muted)] max-w-sm mb-10">
+            Looks like you haven't added anything to your cart yet. Explore our collections to find your next favorite item!
+          </p>
+          <Link to="/collection">
+            <Button size="lg" className="px-12 py-4 rounded-full font-bold uppercase tracking-widest text-sm shadow-md transition-transform hover:scale-105">
+              Explore Collections
+            </Button>
+          </Link>
+          {cartData.length > 0 && validCartData.length === 0 && (
+             <p className="text-xs text-red-400 mt-6 max-w-xs mx-auto">
+                Note: Some old items in your cart are no longer available in the store. Please tap "Clear Bag" at the top to refresh your cart.
+             </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

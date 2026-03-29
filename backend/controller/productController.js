@@ -1,5 +1,6 @@
 import uploadOnCloudinary from "../config/cloudinary.js"
 import Product from "../model/productModel.js"
+import User from "../model/userModel.js"
 
 
 export const addProduct = async (req,res) => {
@@ -62,3 +63,43 @@ export const removeProduct = async (req,res) => {
     }
     
 }
+
+export const addReview = async (req, res) => {
+    try {
+        const { rating, comment } = req.body;
+        const productId = req.params.id;
+        const userId = req.userId;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Check if user already reviewed
+        const alreadyReviewed = product.reviews.find(r => r.userId.toString() === userId.toString());
+        if (alreadyReviewed) {
+            return res.status(400).json({ message: "You have already reviewed this product" });
+        }
+
+        const review = {
+            userId: userId,
+            name: user.name,
+            rating: Number(rating),
+            comment,
+            date: Date.now()
+        };
+
+        product.reviews.push(review);
+        await product.save();
+
+        return res.status(201).json({ message: "Review added successfully", product });
+    } catch (error) {
+        console.log("AddReview error", error);
+        return res.status(500).json({ message: `AddReview error ${error}` });
+    }
+};

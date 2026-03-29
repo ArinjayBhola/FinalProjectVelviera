@@ -10,11 +10,11 @@ function About() {
       {/* Hero Section */}
       <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         <div className="w-full lg:w-1/2">
-          <div className="relative aspect-[4/3] rounded-soft overflow-hidden border border-[var(--border-base)] shadow-lg">
+          <div className="relative flex aspect-[4/3] rounded-soft overflow-hidden border border-[var(--border-base)] cursor-default transition-all duration-500 hover:ring-4 hover:ring-[var(--brand-secondary)] hover:ring-offset-4 hover:ring-offset-[var(--background-base)] shadow-xl group">
             <img
               src={about}
               alt="About Velviera"
-              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           </div>
         </div>

@@ -4,6 +4,7 @@ import Registration from './pages/Registration'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import MainLayout from './components/layout/MainLayout'
+import ScrollToTop from './components/layout/ScrollToTop'
 import { userDataContext } from './context/UserContext'
 import About from './pages/About'
 import Collections from './pages/Collections'
@@ -13,6 +14,7 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import PlaceOrder from './pages/PlaceOrder'
 import Order from './pages/Order'
+import Wishlist from './pages/Wishlist'
 import NotFound from './pages/NotFound'
 import Ai from './component/Ai'
 function App() {
@@ -21,6 +23,7 @@ let location = useLocation()
   
   return (
     <MainLayout>
+      <ScrollToTop />
       <Routes>
 
         <Route path='/login' 
@@ -40,6 +43,9 @@ let location = useLocation()
 
         <Route path='/collection' 
         element={userData ? <Collections/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
+
+        <Route path='/wishlist' 
+        element={userData ? <Wishlist/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
 
         <Route path='/product' 
         element={userData ? <Product/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
