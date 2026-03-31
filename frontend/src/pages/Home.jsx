@@ -5,6 +5,7 @@ import { shopDataContext } from '../context/ShopContext';
 import { authDataContext } from '../context/authContext';
 import { userDataContext } from '../context/UserContext';
 import Card from '../components/ui/Card';
+import RecommendationSection from '../components/shared/RecommendationSection';
 
 const Home = () => {
   const { products } = useContext(shopDataContext);
@@ -108,6 +109,9 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      {/* Recommended for You - ML Model Integrated */}
+      <RecommendationSection />
 
       {/* Newsletter */}
       <section className="container mx-auto px-4">

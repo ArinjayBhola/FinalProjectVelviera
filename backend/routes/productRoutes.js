@@ -1,5 +1,5 @@
 import express from 'express'
-import { addProduct, listProduct, removeProduct, addReview } from '../controller/productController.js'
+import { addProduct, listProduct, removeProduct, addReview, getRecommendations } from '../controller/productController.js'
 import isAuth from '../middleware/isAuth.js'
 import upload from '../middleware/multer.js'
 import adminAuth from "../middleware/adminAuth.js"
@@ -16,6 +16,7 @@ productRoutes.post("/addproduct",upload.fields([
 productRoutes.get("/list", listProduct)
 productRoutes.post("/remove/:id",adminAuth,removeProduct)
 productRoutes.post("/:id/review", isAuth, addReview)
+productRoutes.get("/recommendations", isAuth, getRecommendations)
 
 
 
