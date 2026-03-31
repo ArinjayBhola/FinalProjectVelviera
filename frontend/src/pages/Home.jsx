@@ -2,10 +2,15 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import { shopDataContext } from '../context/ShopContext';
+import { authDataContext } from '../context/authContext';
+import { userDataContext } from '../context/UserContext';
 import Card from '../components/ui/Card';
 
 const Home = () => {
   const { products } = useContext(shopDataContext);
+  const { serverUrl } = useContext(authDataContext);
+  const { token, userData } = useContext(userDataContext);
+  
   const latestProducts = products?.slice(0, 4) || [];
 
   return (

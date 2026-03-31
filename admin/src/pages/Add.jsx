@@ -81,7 +81,8 @@ const Add = () => {
         showAlert("Error", response.data.message || "Failed to add product", "error");
       }
     } catch (error) {
-      showAlert("Oops!", "Something went wrong while adding the product. Please try again.", "error");
+      const backendMessage = error.response?.data?.message || "Something went wrong while adding the product. Please try again.";
+      showAlert("Oops!", backendMessage, "error");
     } finally {
       setLoading(false);
     }

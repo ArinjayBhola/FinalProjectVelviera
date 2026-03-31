@@ -2,12 +2,13 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineExclamationCircle, HiOutlineInformationCircle, HiXMark } from 'react-icons/hi2';
 
-const Modal = ({ isOpen, onClose, title, message, type = 'info' }) => {
+const Modal = ({ isOpen, onClose, title, message, type = 'info', onConfirm, confirmText = 'Confirm', cancelText = 'Cancel' }) => {
   const icons = {
     success: <HiOutlineCheckCircle className="w-12 h-12 text-green-500" />,
     error: <HiOutlineXCircle className="w-12 h-12 text-red-500" />,
     warning: <HiOutlineExclamationCircle className="w-12 h-12 text-yellow-500" />,
     info: <HiOutlineInformationCircle className="w-12 h-12 text-blue-500" />,
+    confirm: <HiOutlineExclamationCircle className="w-12 h-12 text-amber-500" />,
   };
 
   const borderColors = {
@@ -15,6 +16,7 @@ const Modal = ({ isOpen, onClose, title, message, type = 'info' }) => {
     error: 'border-red-500/20',
     warning: 'border-yellow-500/20',
     info: 'border-blue-500/20',
+    confirm: 'border-amber-500/20',
   };
 
   return (
@@ -50,17 +52,43 @@ const Modal = ({ isOpen, onClose, title, message, type = 'info' }) => {
                 {message}
               </p>
 
-              <button
-                onClick={onClose}
-                className={`px-8 py-2.5 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl active:scale-95 ${
-                  type === 'success' ? 'bg-green-500 text-white hover:bg-green-600' :
-                  type === 'error' ? 'bg-red-500 text-white hover:bg-red-600' :
-                  type === 'warning' ? 'bg-yellow-500 text-white hover:bg-yellow-600' :
-                  'bg-black text-white hover:opacity-90'
-                }`}
-              >
-                Continue
-              </button>
+              <div className="flex w-full gap-3 justify-center">
+                {onConfirm ? (
+                  <>
+                    <button
+                      onClick={onClose}
+                      className="flex-1 px-6 py-2.5 rounded-full font-bold text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all active:scale-95"
+                    >
+                      {cancelText}
+                    </button>
+                    <button
+                      onClick={() => {
+                        onConfirm();
+                        onClose();
+                      }}
+                      className={`flex-1 px-6 py-2.5 rounded-full font-bold text-sm text-white transition-all shadow-lg hover:shadow-xl active:scale-95 ${
+                        type === 'error' ? 'bg-red-500 hover:bg-red-600' :
+                        type === 'confirm' ? 'bg-amber-500 hover:bg-amber-600' :
+                        'bg-black hover:opacity-90'
+                      }`}
+                    >
+                      {confirmText}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={onClose}
+                    className={`px-8 py-2.5 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl active:scale-95 ${
+                      type === 'success' ? 'bg-green-500 text-white hover:bg-green-600' :
+                      type === 'error' ? 'bg-red-500 text-white hover:bg-red-600' :
+                      type === 'warning' ? 'bg-yellow-500 text-white hover:bg-yellow-600' :
+                      'bg-black text-white hover:opacity-90'
+                    }`}
+                  >
+                    Continue
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         </div>

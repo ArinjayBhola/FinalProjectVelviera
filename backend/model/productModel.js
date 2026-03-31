@@ -7,19 +7,19 @@ const productSchema = new mongoose.Schema({
     },
     image1:{
         type:String,
-        required:true
+        default:""
     },
     image2:{
         type:String,
-        required:true
+        default:""
     },
     image3:{
         type:String,
-        required:true
+        default:""
     },
     image4:{
         type:String,
-        required:true
+        default:""
     },
     description:{
         type:String,

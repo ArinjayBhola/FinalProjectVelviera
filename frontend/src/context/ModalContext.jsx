@@ -9,6 +9,8 @@ export const ModalProvider = ({ children }) => {
     title: '',
     message: '',
     type: 'info',
+    onConfirm: null,
+    confirmText: 'Confirm',
   });
 
   const showAlert = useCallback((title, message, type = 'info') => {
@@ -17,6 +19,18 @@ export const ModalProvider = ({ children }) => {
       title,
       message,
       type,
+      onConfirm: null,
+    });
+  }, []);
+
+  const showConfirm = useCallback((title, message, onConfirm, confirmText = 'Confirm') => {
+    setModalState({
+      isOpen: true,
+      title,
+      message,
+      type: 'confirm',
+      onConfirm,
+      confirmText,
     });
   }, []);
 
@@ -25,7 +39,7 @@ export const ModalProvider = ({ children }) => {
   }, []);
 
   return (
-    <ModalContext.Provider value={{ showAlert }}>
+    <ModalContext.Provider value={{ showAlert, showConfirm }}>
       {children}
       <Modal
         isOpen={modalState.isOpen}
@@ -33,6 +47,8 @@ export const ModalProvider = ({ children }) => {
         title={modalState.title}
         message={modalState.message}
         type={modalState.type}
+        onConfirm={modalState.onConfirm}
+        confirmText={modalState.confirmText}
       />
     </ModalContext.Provider>
   );
