@@ -156,15 +156,11 @@ function ShopContext({children}) {
 
     useEffect(() => {
     getUserCart()
-  },[])
-
-
-
-
+  },[userData])
 
 
     let value = {
-      products, currency , delivery_fee,getProducts,search,setSearch,showSearch,setShowSearch,cartItem, addtoCart, getCartCount, setCartItem ,updateQuantity,getCartAmount,loading,clearCartHandler
+      products, currency , delivery_fee,getProducts,search,setSearch,showSearch,setShowSearch,cartItem, addtoCart, getCartCount, setCartItem ,updateQuantity,getCartAmount,loading,clearCartHandler, backendUrl: serverUrl
     }
   return (
     <div>

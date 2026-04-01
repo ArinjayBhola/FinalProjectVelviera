@@ -118,12 +118,80 @@ export const userOrders = async (req,res) => {
       try {
         const userId = req.userId;
         const orders = await Order.find({userId})
-        return res.status(200).json(orders)
+        return res.status(200).json({ success: true, orders })
     } catch (error) {
         console.log(error)
-        return res.status(500).json({message:"userOrders error"})
+        return res.status(500).json({ success: false, message: "userOrders error" })
     }
     
+}
+
+export const cancelOrder = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+        const userId = req.userId;
+
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.userId !== userId.toString()) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+
+        // Allow cancellation only if order is not yet shipped or delivered
+        if (order.status !== 'Order Placed' && order.status !== 'Packing') {
+            return res.status(400).json({ success: false, message: `Cannot cancel order in ${order.status} state` });
+        }
+
+        order.status = 'Cancelled';
+        await order.save();
+
+        res.status(200).json({ success: true, message: 'Order cancelled successfully' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export const returnOrder = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+        const userId = req.userId;
+
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.userId !== userId.toString()) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+
+        if (order.status !== 'Delivered') {
+            return res.status(400).json({ success: false, message: 'Only delivered orders can be returned' });
+        }
+
+        // Check if within 7 days of delivery (using updatedAt as approximation for delivery time)
+        const deliveryDate = new Date(order.updatedAt);
+        const currentDate = new Date();
+        const diffInDays = Math.ceil((currentDate - deliveryDate) / (1000 * 60 * 60 * 24));
+
+        if (diffInDays > 7) {
+            return res.status(400).json({ success: false, message: 'Return window (7 days) has expired' });
+        }
+
+        order.status = 'Return Requested';
+        await order.save();
+
+        res.status(200).json({ success: true, message: 'Return request submitted successfully' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 }
 
 
@@ -152,9 +220,8 @@ try {
     const {orderId , status} = req.body
 
     await Order.findByIdAndUpdate(orderId , { status })
-    return res.status(201).json({message:'Status Updated'})
+    return res.status(200).json({ success: true, message: 'Status Updated' })
 } catch (error) {
-     return res.status(500).json({message:error.message
-            })
+     return res.status(500).json({ success: false, message: error.message })
 }
 }

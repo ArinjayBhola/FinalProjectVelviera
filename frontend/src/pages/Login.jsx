@@ -110,11 +110,6 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-end">
-              <Link to="/forgot-password" size="sm" className="text-sm font-bold text-[var(--brand-primary)] hover:underline underline-offset-4">
-                Forgot password?
-              </Link>
-            </div>
 
             <Button type="submit" disabled={loading} className="w-full py-4 h-14 text-base font-bold rounded-xl shadow-lg shadow-[var(--brand-primary)]/10">
               {loading ? "Authenticating..." : "Sign in to Velviera"}

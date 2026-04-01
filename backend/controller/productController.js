@@ -115,7 +115,7 @@ export const getRecommendations = async (req, res) => {
 
         if (orders.length === 0) {
             // Fallback to latest products if no orders
-            const fallback = allProducts.sort((a, b) => b.date - a.date).slice(0, 8);
+            const fallback = allProducts.sort((a, b) => b.date - a.date).slice(0, 10);
             return res.status(200).json(fallback);
         }
 
@@ -162,7 +162,7 @@ export const getRecommendations = async (req, res) => {
         });
 
         if (weightedProducts.length === 0) {
-            return res.status(200).json(allProducts.slice(0, 8));
+            return res.status(200).json(allProducts.slice(0, 10));
         }
 
         // Generate Weighted Interest Profile
@@ -217,7 +217,7 @@ export const getRecommendations = async (req, res) => {
 
         const topRecommendations = recommendations
             .sort((a, b) => b.score - a.score)
-            .slice(0, 8)
+            .slice(0, 10)
             .map(r => ({
                 ...r.product.toObject(),
                 matchScore: r.matchScore,

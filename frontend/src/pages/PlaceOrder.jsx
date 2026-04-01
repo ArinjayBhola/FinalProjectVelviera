@@ -10,7 +10,7 @@ import { useModal } from '../context/ModalContext';
 import { userDataContext } from '../context/UserContext';
 
 const PlaceOrder = () => {
-  const { backendUrl, token, cartItem, setCartItem, getCartAmount, delivery_fee, products } = useContext(shopDataContext);
+  const { backendUrl, cartItem, setCartItem, getCartAmount, delivery_fee, products } = useContext(shopDataContext);
   const { userData } = useContext(userDataContext);
   const navigate = useNavigate();
   const [method, setMethod] = useState('cod');
@@ -62,7 +62,7 @@ const PlaceOrder = () => {
 
       switch (method) {
         case 'cod':
-          const response = await axios.post(backendUrl + '/api/order/place', orderData, { headers: { token } });
+          const response = await axios.post(backendUrl + '/api/order/placeorder', orderData, { withCredentials: true });
           if (response.status === 200 || response.status === 201) {
             setCartItem({});
             navigate('/order');
@@ -73,7 +73,7 @@ const PlaceOrder = () => {
           break;
 
         case 'razorpay':
-          const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, { headers: { token } });
+          const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, { withCredentials: true });
           if (responseRazorpay.status === 200 || responseRazorpay.status === 201) {
             initPay(responseRazorpay.data.order);
           }
@@ -101,7 +101,7 @@ const PlaceOrder = () => {
       receipt: order.receipt,
       handler: async (response) => {
         try {
-          const { data, status } = await axios.post(backendUrl + '/api/order/verifyRazorpay', response, { headers: { token } });
+          const { data, status } = await axios.post(backendUrl + '/api/order/verifyrazorpay', response, { withCredentials: true });
           if (status === 200 || status === 201) {
             navigate('/order');
             setCartItem({});
@@ -151,13 +151,11 @@ const PlaceOrder = () => {
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                onClick={() => setMethod('razorpay')}
-                className={`flex items-center justify-center p-4 rounded-soft border transition-all ${
-                  method === 'razorpay' ? 'border-[var(--brand-primary)] bg-[var(--background-base)] ring-2 ring-[var(--brand-primary)]/10' : 'border-[var(--border-base)] bg-transparent grayscale hover:grayscale-0'
-                }`}
+                disabled
+                className={`flex flex-col items-center justify-center p-4 rounded-soft border transition-all opacity-50 cursor-not-allowed border-[var(--border-base)] bg-transparent`}
               >
-                <img src="https://razorpay.com/assets/razorpay-logo-white.svg" alt="Razorpay" className="h-6 dark:block hidden" />
-                <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" className="h-6 dark:hidden block" />
+                <span className="text-sm font-bold uppercase tracking-widest leading-none">Online Payment</span>
+                <span className="text-[10px] mt-1 text-[var(--text-muted)] font-medium underline decoration-[var(--brand-secondary)] underline-offset-4">Coming Soon</span>
               </button>
               <button
                 type="button"
@@ -171,9 +169,29 @@ const PlaceOrder = () => {
             </div>
           </div>
 
-          <Button type="submit" size="lg" className="h-14 rounded-full text-lg" disabled={loading}>
-            {loading ? 'Processing...' : 'Place Order Now'}
-          </Button>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start gap-3 p-4 bg-orange-50/50 border border-orange-100 rounded-soft">
+              <span className="text-lg">🛡️</span>
+              <div className="flex flex-col">
+                <h4 className="text-xs font-bold uppercase tracking-widest text-orange-800">Return Policy</h4>
+                <p className="text-[10px] text-orange-700/80 leading-relaxed">
+                  Every order is covered by our **7-day Return & Replacement** policy from the date of delivery. 
+                  Items must be unused and in original packaging.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 px-1">
+              <input type="checkbox" id="policy-check" required className="w-4 h-4 accent-[var(--brand-primary)] cursor-pointer" />
+              <label htmlFor="policy-check" className="text-[10px] text-[var(--text-muted)] cursor-pointer select-none">
+                I agree to the terms and the **7-day return/replacement** policy.
+              </label>
+            </div>
+
+            <Button type="submit" size="lg" className="h-14 rounded-full text-lg" disabled={loading}>
+              {loading ? 'Processing...' : 'Place Order Now'}
+            </Button>
+          </div>
         </div>
       </form>
     </div>

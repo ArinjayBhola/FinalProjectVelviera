@@ -6,6 +6,7 @@ import { authDataContext } from '../context/authContext';
 import { userDataContext } from '../context/UserContext';
 import Card from '../components/ui/Card';
 import RecommendationSection from '../components/shared/RecommendationSection';
+import { motion } from 'framer-motion';
 
 const Home = () => {
   const { products } = useContext(shopDataContext);
@@ -15,33 +16,74 @@ const Home = () => {
   const latestProducts = products?.slice(0, 4) || [];
 
   return (
-    <div className="flex flex-col gap-24 pb-24">
+    <div className="flex flex-col gap-32 pb-24 overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center overflow-hidden bg-[var(--background-subtle)]">
-        <div className="container mx-auto px-4 z-10">
-          <div className="max-w-2xl">
-            <span className="inline-block px-3 py-1 mb-6 text-xs font-bold tracking-widest uppercase text-[var(--brand-secondary)] border border-[var(--border-base)] rounded-full">
-              New Collection 2026
-            </span>
-            <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[0.9]">
-              ESSENTIALS <br />
-              <span className="text-[var(--brand-secondary)]">REDEFINED.</span>
-            </h1>
-            <p className="text-lg text-[var(--text-muted)] mb-10 max-w-lg leading-relaxed">
-              Discover our latest drop of premium essentials. Crafted with precision, designed for the modern individual who values quality and minimalism.
-            </p>
-            <div className="flex flex-wrap gap-4">
+      <section className="relative h-[90vh] flex items-center overflow-hidden bg-[var(--background-base)]">
+        {/* Background Layer */}
+        <motion.div 
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="absolute inset-0 z-0"
+        >
+          <img 
+            src="/hero.png" 
+            alt="Premium Collection" 
+            className="w-full h-full object-cover object-center opacity-60 dark:opacity-40"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--background-base)] via-[var(--background-base)]/80 to-transparent" />
+        </motion.div>
+
+        <div className="container mx-auto px-6 z-10">
+          <div className="max-w-3xl">
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--brand-primary)] bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-full backdrop-blur-sm"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-secondary)] animate-pulse" />
+              Limited Collection 2026
+            </motion.div>
+            
+            <motion.h1 
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.8 }}
+              className="text-7xl md:text-9xl font-black tracking-tighter mb-10 leading-[0.85] text-gradient"
+            >
+              PURE <br />
+              ESSENCE.
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.9 }}
+              className="text-xl text-[var(--text-muted)] mb-12 max-w-xl font-medium leading-relaxed"
+            >
+              A symphony of premium materials and architectural silhouettes. Designed for the discerning individual who find luxury in simplicity.
+            </motion.p>
+            
+            <motion.div 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 1.1 }}
+              className="flex flex-wrap gap-5"
+            >
               <Link to="/collection">
-                <Button size="lg" className="rounded-full px-8">Shop Collection</Button>
+                <Button size="lg" className="rounded-full px-10 h-14 bg-[var(--brand-primary)] shadow-xl shadow-[var(--brand-primary)]/20 hover:scale-105 transition-transform">
+                  Explore Collection
+                </Button>
               </Link>
               <Link to="/about">
-                <Button variant="secondary" size="lg" className="rounded-full px-8">Our Story</Button>
+                <Button variant="secondary" size="lg" className="rounded-full px-10 h-14 backdrop-blur-md bg-white/30 border-white/20 hover:bg-white/50 transition-all">
+                  Our Philosophy
+                </Button>
               </Link>
-            </div>
+            </motion.div>
           </div>
         </div>
-        {/* Abstract shapes or placeholder for image */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-[var(--border-base)]/20 -skew-x-12 translate-x-1/4" />
       </section>
 
       {/* Featured Categories */}
