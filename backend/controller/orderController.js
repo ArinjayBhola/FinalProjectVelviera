@@ -159,6 +159,9 @@ export const cancelOrder = async (req, res) => {
         order.status = 'Cancelled';
         await order.save();
 
+        // Restore stock for each cancelled item
+        await restoreStockForOrder(order);
+
         res.status(200).json({ success: true, message: 'Order cancelled successfully' });
     } catch (error) {
         console.log(error);
@@ -225,13 +228,43 @@ export const allOrders = async (req,res) => {
 }
     
 export const updateStatus = async (req,res) => {
-    
 try {
     const {orderId , status} = req.body
 
-    await Order.findByIdAndUpdate(orderId , { status })
+    const order = await Order.findById(orderId)
+    if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' })
+    }
+
+    const stockReturningStatuses = ['Cancelled', 'Returned']
+    const wasRestorable = stockReturningStatuses.includes(order.status)
+    const becomesRestorable = stockReturningStatuses.includes(status)
+
+    order.status = status
+    await order.save()
+
+    // Restore stock only once, when transitioning INTO a restocking state
+    if (!wasRestorable && becomesRestorable) {
+        await restoreStockForOrder(order)
+    }
+
     return res.status(200).json({ success: true, message: 'Status Updated' })
 } catch (error) {
      return res.status(500).json({ success: false, message: error.message })
 }
+}
+
+// Helper: increment stock back for every item in an order
+async function restoreStockForOrder(order) {
+    try {
+        for (const item of (order.items || [])) {
+            const pid = item._id || item.productId
+            if (!pid) continue
+            await Product.findByIdAndUpdate(pid, {
+                $inc: { stock: Number(item.quantity) || 1 }
+            })
+        }
+    } catch (e) {
+        console.log('restoreStockForOrder error', e.message)
+    }
 }

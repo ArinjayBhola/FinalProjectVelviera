@@ -121,7 +121,7 @@ const Orders = () => {
                     <p className="text-sm font-bold">{order.address.firstName} {order.address.lastName}</p>
                     <div className="flex items-start gap-2 text-xs text-[var(--text-muted)]">
                       <HiOutlineMapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>{order.address.street}, {order.address.city}, {order.address.state}, {order.address.country} - {order.address.pinCode}</span>
+                      <span>{order.address.street}, {order.address.city}, {order.address.state}, {order.address.country} - {order.address.zipcode || order.address.pinCode}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
                       <HiOutlinePhone className="w-4 h-4 flex-shrink-0" />
@@ -171,7 +171,10 @@ const Orders = () => {
                       <option value="Out for delivery">Out for delivery</option>
                       <option value="Delivered">Delivered</option>
                       <option value="Cancelled">Cancelled</option>
-                      <option value="Return Requested">Return Requested</option>
+                      {/* Return Requested is user-initiated and only shown when already in that state */}
+                      {order.status === 'Return Requested' && (
+                        <option value="Return Requested">Return Requested</option>
+                      )}
                       <option value="Return Approved">Return Approved</option>
                       <option value="Returned">Returned</option>
                       <option value="Return Rejected">Return Rejected</option>

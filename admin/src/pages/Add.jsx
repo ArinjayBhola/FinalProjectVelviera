@@ -71,7 +71,7 @@ const Add = () => {
         if (img) formData.append(`image${index + 1}`, img);
       });
 
-      const response = await axios.post(`${serverUrl}/api/product/addproduct`, formData);
+      const response = await axios.post(`${serverUrl}/api/product/addproduct`, formData, { withCredentials: true });
 
       if (response.status === 200 || response.status === 201) {
         showAlert("Product Added", "High-five! Your new product is now live in the catalog.", "success");

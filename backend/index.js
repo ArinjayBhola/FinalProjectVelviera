@@ -14,6 +14,11 @@ import categoryRouter from './routes/categoryRoute.js'
 import addressRoutes from './routes/addressRoutes.js'
 import socialProofRoutes from './routes/socialProofRoutes.js'
 import inventoryRoutes from './routes/inventoryRoutes.js'
+import stylistRoutes from './routes/stylistRoutes.js'
+import embeddingStore from './utils/embeddingStore.js'
+import recommendationEngine from './utils/recommendationEngine.js'
+import visualSearchEngine from './utils/visualSearchEngine.js'
+import Product from './model/productModel.js'
 
 let port = process.env.PORT || 6000
 
@@ -36,13 +41,41 @@ app.use("/api/category",categoryRouter)
 app.use("/api/address",addressRoutes)
 app.use("/api/social",socialProofRoutes)
 app.use("/api/inventory",inventoryRoutes)
+app.use("/api/stylist",stylistRoutes)
 
 
 
 
-app.listen(port,()=>{
+// Warmup ML models + embedding cache in the background after DB connects.
+// Runs once on startup, reuses disk cache, and doesn't block the server.
+async function warmupEngines() {
+    try {
+        embeddingStore.load();
+        const products = await Product.find({}).lean();
+        embeddingStore.pruneMissing(products.map(p => p._id));
+        console.log(`[Warmup] ${products.length} products in DB. Cache:`, embeddingStore.stats());
+
+        // Text embeddings first (fast) — powers recommendations
+        await recommendationEngine.warmupProducts(products);
+
+        // Image embeddings second (slow) — powers visual search
+        await visualSearchEngine.warmupProducts(products);
+
+        console.log('[Warmup] Engines ready. Final cache:', embeddingStore.stats());
+    } catch (e) {
+        console.log('[Warmup] Error during warmup:', e.message);
+    }
+}
+
+app.listen(port, () => {
     console.log("Hello From Server")
-    connectDb()
+    connectDb().then(() => {
+        setTimeout(warmupEngines, 1500);
+    });
 })
+
+// Flush cache on shutdown so embeddings survive restarts
+process.on('SIGINT', () => { embeddingStore.flushSync(); process.exit(0); });
+process.on('SIGTERM', () => { embeddingStore.flushSync(); process.exit(0); });
 
 

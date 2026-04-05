@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from './Header';
 import { useLocation } from 'react-router-dom';
+import StylistChat from '../shared/StylistChat';
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
@@ -48,6 +49,7 @@ const MainLayout = ({ children }) => {
         </div>
       </footer>
       )}
+      {!isAuthPage && <StylistChat />}
     </div>
   );
 };
