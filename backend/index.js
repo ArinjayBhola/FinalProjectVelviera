@@ -11,6 +11,9 @@ import cartRoutes from './routes/cartRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import adminRouter from './routes/adminRoutes.js'
 import categoryRouter from './routes/categoryRoute.js'
+import addressRoutes from './routes/addressRoutes.js'
+import socialProofRoutes from './routes/socialProofRoutes.js'
+import inventoryRoutes from './routes/inventoryRoutes.js'
 
 let port = process.env.PORT || 6000
 
@@ -30,6 +33,9 @@ app.use("/api/cart",cartRoutes)
 app.use("/api/order",orderRoutes)
 app.use("/api/admin",adminRouter)
 app.use("/api/category",categoryRouter)
+app.use("/api/address",addressRoutes)
+app.use("/api/social",socialProofRoutes)
+app.use("/api/inventory",inventoryRoutes)
 
 
 

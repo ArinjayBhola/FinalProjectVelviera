@@ -3,11 +3,13 @@ import Product from "../model/productModel.js"
 import User from "../model/userModel.js"
 import Order from "../model/orderModel.js"
 import recommendationEngine from "../utils/recommendationEngine.js"
+import visualSearchEngine from "../utils/visualSearchEngine.js"
+import fs from "fs"
 
 
 export const addProduct = async (req,res) => {
     try {
-        let {name,description,price,category,subCategory,sizes,bestseller} = req.body
+        let {name,description,price,category,subCategory,sizes,bestseller,stock,lowStockThreshold} = req.body
 
         let image1 = req.files.image1 && req.files.image1[0] ? await uploadOnCloudinary(req.files.image1[0].path) : "";
         let image2 = req.files.image2 && req.files.image2[0] ? await uploadOnCloudinary(req.files.image2[0].path) : "";
@@ -26,8 +28,9 @@ export const addProduct = async (req,res) => {
             image1,
             image2,
             image3,
-            image4
-            
+            image4,
+            stock: stock !== undefined ? Number(stock) : 20,
+            lowStockThreshold: lowStockThreshold !== undefined ? Number(lowStockThreshold) : 5
         }
 
         const product = await Product.create(productData)
@@ -104,6 +107,52 @@ export const addReview = async (req, res) => {
     } catch (error) {
         console.log("AddReview error", error);
         return res.status(500).json({ message: `AddReview error ${error}` });
+    }
+};
+
+export const visualSearch = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No image uploaded" });
+        }
+
+        // Read uploaded file as buffer (multer disk storage)
+        const buffer = fs.readFileSync(req.file.path);
+        const queryVector = await visualSearchEngine.embedImageFromBuffer(buffer);
+
+        // Cleanup uploaded file
+        try { fs.unlinkSync(req.file.path); } catch (e) { /* ignore */ }
+
+        const allProducts = await Product.find({});
+        const scored = [];
+
+        // Embed products (cached) and score
+        for (const product of allProducts) {
+            const vec = await visualSearchEngine.getProductEmbedding(product);
+            if (!vec) continue;
+            const similarity = visualSearchEngine.cosineSimilarity(queryVector, vec);
+            scored.push({
+                product,
+                similarity,
+                matchScore: Math.round(Math.min(99, Math.max(1, similarity * 100)))
+            });
+        }
+
+        const top = scored
+            .sort((a, b) => b.similarity - a.similarity)
+            .slice(0, 12)
+            .map(r => ({
+                ...r.product.toObject(),
+                matchScore: r.matchScore
+            }));
+
+        return res.status(200).json(top);
+    } catch (error) {
+        console.log("visualSearch error", error);
+        if (req.file?.path) {
+            try { fs.unlinkSync(req.file.path); } catch (e) { /* ignore */ }
+        }
+        return res.status(500).json({ message: `visualSearch error ${error.message}` });
     }
 };
 

@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import { shopDataContext } from "../context/ShopContext";
 import { userDataContext } from "../context/UserContext";
 import { authDataContext } from "../context/authContext";
-import { HiStar, HiOutlineCheckCircle, HiOutlineHeart, HiMiniHeart } from "react-icons/hi2";
+import { HiStar, HiOutlineCheckCircle, HiOutlineHeart, HiMiniHeart, HiCheckBadge } from "react-icons/hi2";
+import SocialProof from "../components/shared/SocialProof";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import axios from 'axios';
@@ -22,6 +23,13 @@ const ProductDetail = () => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [verifiedBuyerIds, setVerifiedBuyerIds] = useState(new Set());
+
+  const handleSocialProofData = (data) => {
+    const ids = new Set();
+    (data.reviews || []).forEach(r => { if (r.verifiedBuyer) ids.add(r.userId?.toString()); });
+    setVerifiedBuyerIds(ids);
+  };
 
   const getRatingEmoji = (num) => {
     switch(num) {
@@ -149,6 +157,8 @@ const ProductDetail = () => {
             </div>
           </div>
 
+          <SocialProof productId={productId} onData={handleSocialProofData} />
+
           <p className="text-3xl font-medium">{currency}{productData.price}</p>
           
           <p className="text-[var(--text-muted)] leading-relaxed max-w-xl">
@@ -254,7 +264,14 @@ const ProductDetail = () => {
                       <div key={index} className="p-6 bg-[var(--background-subtle)] rounded-soft border border-[var(--border-base)]">
                          <div className="flex justify-between items-start mb-4">
                            <div>
-                             <p className="font-bold text-[var(--text-base)]">{rev.name}</p>
+                             <div className="flex items-center gap-2 flex-wrap">
+                               <p className="font-bold text-[var(--text-base)]">{rev.name}</p>
+                               {verifiedBuyerIds.has(rev.userId?.toString()) && (
+                                 <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-green-50 border border-green-200 text-green-700 rounded-full">
+                                   <HiCheckBadge className="w-3 h-3" /> Verified Buyer
+                                 </span>
+                               )}
+                             </div>
                              <p className="text-xs text-[var(--text-muted)]">{new Date(rev.date).toLocaleDateString()}</p>
                            </div>
                            <div className="flex text-yellow-500">

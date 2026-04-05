@@ -65,8 +65,10 @@ const Order = () => {
     }
   }, [userData]);
 
-  const activeOrders = orderData.filter(item => item.status !== 'Delivered' && item.status !== 'Cancelled' && item.status !== 'Return Requested');
-  const completedOrders = orderData.filter(item => item.status === 'Delivered' || item.status === 'Cancelled' || item.status === 'Return Requested');
+  const completedStatuses = ['Delivered', 'Cancelled', 'Returned', 'Return Rejected'];
+  const returnInFlight = ['Return Requested', 'Return Approved'];
+  const activeOrders = orderData.filter(item => !completedStatuses.includes(item.status) && !returnInFlight.includes(item.status));
+  const completedOrders = orderData.filter(item => completedStatuses.includes(item.status) || returnInFlight.includes(item.status));
 
   const isReturnable = (updatedAt) => {
     const deliveryDate = new Date(updatedAt);
@@ -128,9 +130,10 @@ const Order = () => {
                 <div className="flex flex-col md:items-end gap-4 w-full md:w-auto">
                   <div className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${
-                      item.status === 'Delivered' ? 'bg-green-500' : 
-                      item.status === 'Cancelled' ? 'bg-red-500' : 
-                      item.status === 'Return Requested' ? 'bg-purple-500' : 'bg-orange-400 animate-pulse'
+                      item.status === 'Delivered' ? 'bg-green-500' :
+                      item.status === 'Cancelled' || item.status === 'Return Rejected' ? 'bg-red-500' :
+                      item.status === 'Returned' ? 'bg-gray-500' :
+                      item.status === 'Return Requested' || item.status === 'Return Approved' ? 'bg-purple-500 animate-pulse' : 'bg-orange-400 animate-pulse'
                     }`}></span>
                     <span className="text-sm font-bold uppercase tracking-tight">{item.status}</span>
                   </div>

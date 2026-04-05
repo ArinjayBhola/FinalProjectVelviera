@@ -3,8 +3,8 @@ import { shopDataContext } from '../context/ShopContext';
 import { useNavigate } from 'react-router-dom';
 import CartTotal from '../components/shared/CartTotal';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
+import SavedAddresses from '../components/shared/SavedAddresses';
 import axios from 'axios';
 import { useModal } from '../context/ModalContext';
 import { userDataContext } from '../context/UserContext';
@@ -16,27 +16,16 @@ const PlaceOrder = () => {
   const [method, setMethod] = useState('cod');
   const [loading, setLoading] = useState(false);
   const { showAlert } = useModal();
-
-  const [formData, setFormData] = useState({
-    firstName: userData?.userName || '',
-    lastName: '',
-    email: userData?.email || '',
-    street: '',
-    city: '',
-    state: '',
-    zipcode: '',
-    country: '',
-    phone: ''
-  });
-
-  const onChangeHandler = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-    setFormData(data => ({ ...data, [name]: value }));
-  };
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
+
+    if (!selectedAddress) {
+      showAlert('Address Required', 'Please select or add a delivery address before placing your order.', 'info');
+      return;
+    }
+
     setLoading(true);
     try {
       let orderItems = [];
@@ -53,8 +42,21 @@ const PlaceOrder = () => {
         }
       }
 
+      // Build address payload from selected saved address
+      const addressPayload = {
+        firstName: selectedAddress.firstName,
+        lastName: selectedAddress.lastName || '',
+        email: selectedAddress.email || userData?.email || '',
+        street: selectedAddress.street,
+        city: selectedAddress.city,
+        state: selectedAddress.state,
+        zipcode: selectedAddress.zipcode,
+        country: selectedAddress.country,
+        phone: selectedAddress.phone
+      };
+
       let orderData = {
-        address: formData,
+        address: addressPayload,
         items: orderItems,
         amount: getCartAmount() + delivery_fee,
         userId: userData._id
@@ -122,22 +124,11 @@ const PlaceOrder = () => {
       <form onSubmit={onSubmitHandler} className="grid grid-cols-1 lg:grid-cols-2 gap-16">
         {/* Delivery Information */}
         <div className="flex flex-col gap-8">
-          <h2 className="text-3xl font-bold tracking-tight">Delivery Information</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="First Name" name="firstName" value={formData.firstName} onChange={onChangeHandler} required />
-            <Input label="Last Name" name="lastName" value={formData.lastName} onChange={onChangeHandler} required />
-          </div>
-          <Input label="Email address" type="email" name="email" value={formData.email} onChange={onChangeHandler} required />
-          <Input label="Street" name="street" value={formData.street} onChange={onChangeHandler} required />
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="City" name="city" value={formData.city} onChange={onChangeHandler} required />
-            <Input label="State" name="state" value={formData.state} onChange={onChangeHandler} required />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Zipcode" name="zipcode" value={formData.zipcode} onChange={onChangeHandler} required />
-            <Input label="Country" name="country" value={formData.country} onChange={onChangeHandler} required />
-          </div>
-          <Input label="Phone" type="tel" name="phone" value={formData.phone} onChange={onChangeHandler} required />
+          <h2 className="text-3xl font-bold tracking-tight">Delivery Address</h2>
+          <SavedAddresses
+            selectedId={selectedAddress?._id}
+            onSelect={setSelectedAddress}
+          />
         </div>
 
         {/* Order Summary & Payment */}
@@ -175,12 +166,12 @@ const PlaceOrder = () => {
               <div className="flex flex-col">
                 <h4 className="text-xs font-bold uppercase tracking-widest text-orange-800">Return Policy</h4>
                 <p className="text-[10px] text-orange-700/80 leading-relaxed">
-                  Every order is covered by our **7-day Return & Replacement** policy from the date of delivery. 
+                  Every order is covered by our **7-day Return & Replacement** policy from the date of delivery.
                   Items must be unused and in original packaging.
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3 px-1">
               <input type="checkbox" id="policy-check" required className="w-4 h-4 accent-[var(--brand-primary)] cursor-pointer" />
               <label htmlFor="policy-check" className="text-[10px] text-[var(--text-muted)] cursor-pointer select-none">
@@ -188,7 +179,7 @@ const PlaceOrder = () => {
               </label>
             </div>
 
-            <Button type="submit" size="lg" className="h-14 rounded-full text-lg" disabled={loading}>
+            <Button type="submit" size="lg" className="h-14 rounded-full text-lg" disabled={loading || !selectedAddress}>
               {loading ? 'Processing...' : 'Place Order Now'}
             </Button>
           </div>

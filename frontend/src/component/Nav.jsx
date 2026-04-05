@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import logo from "../assets/logo.png";
 import { IoSearchCircleOutline } from "react-icons/io5";
+import { HiOutlineCamera } from "react-icons/hi2";
 import { FaCircleUser } from "react-icons/fa6";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { userDataContext } from "../context/UserContext";
@@ -63,7 +64,22 @@ function Nav() {
           </li>
         </ul>
       </div>
-      <div className="w-[30%] flex items-center justify-end gap-[20px]">
+      <div className="w-[30%] flex items-center justify-end gap-[15px]">
+        <button
+          onClick={() => navigate("/visual-search")}
+          title="Visual Search - Find products by image"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#2c7b89] to-[#4fd1c5] text-white text-[11px] font-bold uppercase tracking-wider shadow-md hover:shadow-lg hover:scale-105 transition-all"
+        >
+          <HiOutlineCamera className="w-4 h-4" />
+          Visual Search
+        </button>
+        <button
+          onClick={() => navigate("/visual-search")}
+          title="Visual Search"
+          className="md:hidden w-[36px] h-[36px] rounded-full bg-gradient-to-r from-[#2c7b89] to-[#4fd1c5] text-white flex items-center justify-center shadow-md"
+        >
+          <HiOutlineCamera className="w-[20px] h-[20px]" />
+        </button>
         {!showSearch && (
           <IoSearchCircleOutline
             className="w-[38px] h-[38px] text-[#000000]  cursor-pointer"

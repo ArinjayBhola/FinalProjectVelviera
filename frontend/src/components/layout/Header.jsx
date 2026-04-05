@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { HiOutlineShoppingBag, HiOutlineSun, HiOutlineMoon, HiOutlineHeart } from 'react-icons/hi2';
+import { HiOutlineShoppingBag, HiOutlineSun, HiOutlineMoon, HiOutlineHeart, HiOutlineCamera } from 'react-icons/hi2';
 import { HiOutlineSearch, HiMenuAlt3, HiX } from "react-icons/hi";
 import { userDataContext } from '../../context/UserContext';
 import { shopDataContext } from '../../context/ShopContext';
@@ -65,7 +65,23 @@ const Header = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-5">
-          <button 
+          <Link
+            to="/visual-search"
+            title="Visual Search — find products by image"
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#2c7b89] to-[#4fd1c5] text-white text-[11px] font-bold uppercase tracking-wider shadow-md hover:shadow-lg hover:scale-105 transition-all"
+          >
+            <HiOutlineCamera className="w-4 h-4" />
+            Visual Search
+          </Link>
+          <Link
+            to="/visual-search"
+            title="Visual Search"
+            className="md:hidden p-2 text-[var(--text-base)] hover:bg-[var(--background-subtle)] rounded-full transition-all"
+          >
+            <HiOutlineCamera className="w-5 h-5" />
+          </Link>
+
+          <button
             onClick={toggleTheme}
             className="p-2 text-[var(--text-base)] hover:bg-[var(--background-subtle)] rounded-full transition-all"
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}

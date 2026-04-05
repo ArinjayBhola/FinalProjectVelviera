@@ -16,6 +16,8 @@ const Add = () => {
   const [subCategory, setSubCategory] = useState("TopWear");
   const [bestseller, setBestSeller] = useState(false);
   const [sizes, setSizes] = useState([]);
+  const [stock, setStock] = useState(20);
+  const [lowStockThreshold, setLowStockThreshold] = useState(5);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const { serverUrl } = useContext(authDataContext);
@@ -62,6 +64,8 @@ const Add = () => {
       formData.append("subCategory", subCategory);
       formData.append("bestseller", bestseller);
       formData.append("sizes", JSON.stringify(sizes));
+      formData.append("stock", stock);
+      formData.append("lowStockThreshold", lowStockThreshold);
       
       images.forEach((img, index) => {
         if (img) formData.append(`image${index + 1}`, img);
@@ -77,6 +81,8 @@ const Add = () => {
         setPrice("");
         setBestSeller(false);
         setSizes([]);
+        setStock(20);
+        setLowStockThreshold(5);
       } else {
         showAlert("Error", response.data.message || "Failed to add product", "error");
       }
@@ -175,6 +181,27 @@ const Add = () => {
                   ))}
                 </div>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Stock Quantity"
+                type="number"
+                min="0"
+                placeholder="20"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                required
+              />
+              <Input
+                label="Low-Stock Alert Threshold"
+                type="number"
+                min="0"
+                placeholder="5"
+                value={lowStockThreshold}
+                onChange={(e) => setLowStockThreshold(e.target.value)}
+                required
+              />
             </div>
 
             <label className="flex items-center gap-3 cursor-pointer group w-fit">

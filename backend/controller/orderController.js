@@ -1,5 +1,6 @@
 import Order from "../model/orderModel.js";
 import User from "../model/userModel.js";
+import Product from "../model/productModel.js";
 import razorpay from 'razorpay'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -32,6 +33,15 @@ export const placeOrder = async (req,res) => {
 
          const newOrder = new Order(orderData)
          await newOrder.save()
+
+         // Decrement stock for each item
+         for (const item of items) {
+            const pid = item._id || item.productId;
+            if (!pid) continue;
+            await Product.findByIdAndUpdate(pid, {
+                $inc: { stock: -(Number(item.quantity) || 1) }
+            });
+         }
 
          await User.findByIdAndUpdate(userId,{cartData:{}})
 

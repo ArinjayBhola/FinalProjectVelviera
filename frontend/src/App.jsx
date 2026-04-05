@@ -17,6 +17,7 @@ import Order from './pages/Order'
 import Wishlist from './pages/Wishlist'
 import NotFound from './pages/NotFound'
 import Ai from './component/Ai'
+import VisualSearch from './pages/VisualSearch'
 function App() {
 let {userData} = useContext(userDataContext)
 let location = useLocation()
@@ -60,8 +61,11 @@ let location = useLocation()
 
           <Route path='/placeorder' 
         element={userData ? <PlaceOrder/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
-         <Route path='/order' 
+         <Route path='/order'
         element={userData ? <Order/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
+
+         <Route path='/visual-search'
+        element={userData ? <VisualSearch/> : <Navigate to="/login" state={{from: location.pathname}} /> }/>
 
         <Route path='*' element={<NotFound/>}/>
       </Routes>

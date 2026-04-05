@@ -2,13 +2,15 @@ import axios from 'axios';
 import {useState, useContext, useEffect} from "react";
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { HiOutlineTrash, HiOutlineCube } from "react-icons/hi2";
+import { HiOutlineTrash, HiOutlineCube, HiOutlinePencil, HiCheck, HiXMark } from "react-icons/hi2";
 import { useModal } from '../context/ModalContext';
 import { authDataContext } from '../context/AuthContext';
 
 const Lists = () => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingStockId, setEditingStockId] = useState(null);
+  const [stockDraft, setStockDraft] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { serverUrl } = useContext(authDataContext);
@@ -53,6 +55,19 @@ const Lists = () => {
     );
   };
 
+  const saveStock = async (id) => {
+    try {
+      const res = await axios.put(`${serverUrl}/api/inventory/stock/${id}`, { stock: stockDraft }, { withCredentials: true });
+      if (res.data.success) {
+        showAlert("Stock Updated", `Stock set to ${res.data.product.stock}.`, "success");
+        setEditingStockId(null);
+        fetchList();
+      }
+    } catch (error) {
+      showAlert("Error", "Failed to update stock.", "error");
+    }
+  };
+
   useEffect(() => {
     fetchList();
   }, []);
@@ -77,17 +92,18 @@ const Lists = () => {
         ) : list.length > 0 ? (
           <div className="flex flex-col gap-4">
             {/* Table Header (Desktop) */}
-            <div className="hidden md:grid grid-cols-[80px_1fr_120px_120px_60px] gap-6 px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
+            <div className="hidden md:grid grid-cols-[80px_1fr_120px_100px_140px_60px] gap-6 px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
               <span>Image</span>
               <span>Name</span>
               <span>Category</span>
               <span>Price</span>
+              <span>Stock</span>
               <span className="text-right">Action</span>
             </div>
 
             {currentItems.map((item) => (
               <Card key={item._id} padding={false} className="overflow-hidden group">
-                <div className="grid grid-cols-1 md:grid-cols-[80px_1fr_120px_120px_60px] items-center gap-6 p-4 md:p-2 md:px-6">
+                <div className="grid grid-cols-1 md:grid-cols-[80px_1fr_120px_100px_140px_60px] items-center gap-6 p-4 md:p-2 md:px-6">
                   <div className="w-16 h-16 md:w-12 md:h-12 bg-[var(--background-subtle)] rounded-soft overflow-hidden border border-[var(--border-base)]">
                     <img src={item.image1} alt="" className="w-full h-full object-cover" />
                   </div>
@@ -100,6 +116,42 @@ const Lists = () => {
                   <span className="hidden md:block text-sm text-[var(--text-muted)]">{item.category}</span>
                   
                   <span className="font-bold text-sm">₹{item.price}</span>
+
+                  <div>
+                    {editingStockId === item._id ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          min="0"
+                          value={stockDraft}
+                          onChange={(e) => setStockDraft(Number(e.target.value) || 0)}
+                          className="w-16 px-2 py-1 border border-[var(--border-base)] rounded-soft text-xs focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+                          autoFocus
+                        />
+                        <button onClick={() => saveStock(item._id)} className="p-1 text-green-600 hover:bg-green-50 rounded-soft" title="Save">
+                          <HiCheck className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setEditingStockId(null)} className="p-1 text-red-500 hover:bg-red-50 rounded-soft" title="Cancel">
+                          <HiXMark className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setEditingStockId(item._id); setStockDraft(item.stock ?? 0); }}
+                        className="flex items-center gap-2 group"
+                        title="Click to edit stock"
+                      >
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                          (item.stock ?? 0) === 0 ? 'bg-red-100 text-red-700' :
+                          (item.stock ?? 0) <= (item.lowStockThreshold ?? 5) ? 'bg-orange-100 text-orange-700' :
+                          'bg-green-100 text-green-700'
+                        }`}>
+                          {item.stock ?? 0} units
+                        </span>
+                        <HiOutlinePencil className="w-3.5 h-3.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    )}
+                  </div>
 
                   <div className="flex justify-end">
                     <button 

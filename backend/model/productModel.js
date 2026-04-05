@@ -48,6 +48,16 @@ const productSchema = new mongoose.Schema({
     bestseller:{
         type:Boolean
     },
+    stock:{
+        type:Number,
+        default:20,
+        min:0
+    },
+    lowStockThreshold:{
+        type:Number,
+        default:5,
+        min:0
+    },
     reviews: {
         type: [
             {
